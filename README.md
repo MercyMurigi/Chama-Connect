@@ -124,7 +124,6 @@ Use this sequence to quickly evaluate the current implementation:
 ## Compliance Notes
 
 - No credentials are committed in this repository.
-- Event timing and legal terms should be confirmed against the latest official organizer communication before final submission.
-- **Legal bundle (Kenya-oriented):** `REPOSITORY_TERMS.md` (governing law: Kenya), `LICENSE` (all rights reserved pre-trigger), `NOTICE` (third-party summary), `CONTRIBUTOR_SIGN_OFF.md` (contributor sign-off).
-- Repository ownership and usage restrictions are governed by `REPOSITORY_TERMS.md`.
-- Commercial use or private-benefit use is prohibited before the conditional assignment trigger defined in `REPOSITORY_TERMS.md`.
+- **Binding hackathon terms:** [`docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf`](docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf) (also indexed in [`docs/README.md`](docs/README.md)). This PDF governs participation, IP (**§2** irrevocable assignment to Muiaa Ltd and the community), privacy (**ODPA**), cyber conduct (**Computer Misuse and Cybercrimes Act, 2018**), prizes/KRA, deadlines, and **Kenya / exclusive Nairobi** jurisdiction (**§9.1**).
+- **Supplementary repo clarity:** `REPOSITORY_TERMS.md`, `LICENSE`, `NOTICE`, `CONTRIBUTOR_SIGN_OFF.md` — subordinate to the PDF if anything differs.
+- Unrelated third parties must not treat this repo as a blanket commercial OSS license; see `NOTICE` and `LICENSE`.

@@ -1,71 +1,90 @@
-# Repository Terms and Conditional Assignment
+# Repository Terms (Supplementary to Official Hackathon Terms)
 
 **Effective date:** 17 April 2026
 
-These terms govern all use of this repository and its contents, including code, documentation, designs, assets, and derivative works ("Repository Materials").
+These terms address **repository use, notices, and contributor sign-off** in connection with the Chama Connect Virtual Hackathon. They are **subordinate** to the organizers’ binding contract: see **Official Submission Terms** below.
 
-**Geographic and commercial context:** The hackathon organizers, the ChamaConnect Team (assignee), and this submission are aligned with **Kenya** and the broader **East Africa** region. These terms are intended to be interpreted and enforced consistently with that context.
+## 0) Official Submission Terms (authoritative for participation and IP)
 
-## 1) Parties
+The **ChamaConnect Hackathon: Source Code Submission Terms & Conditions** are reproduced in this repository at:
 
-- **Current Contributors/Owners (pre-trigger):** repository contributors unless otherwise agreed in writing.
-- **Designated Recipient Team:** ChamaConnect Team, defined as Muiaa Ltd (Muiaa Labs) and/or Salamander Community, entities operating in connection with the Chama Connect Virtual Hackathon in the same region.
+`docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf`
 
-## 2) Conditional Assignment Trigger
+**Official Submission Terms** — key points summarized for convenience only (the PDF controls if there is any difference):
 
-Ownership of all right, title, and interest in the Repository Materials automatically transfers to the Designated Recipient Team only when **both** of the following conditions are satisfied:
+| Topic | Summary (see PDF) |
+|--------|---------------------|
+| Organizers | Muiaa Ltd (Muiaa Labs) with Salamander Community |
+| Scope | Improve ChamaConnect (`chamaconnect.io` / `chamaconnect.co.ke`): feature enhancement and ICDMS optimization |
+| IP / ownership | **Irrevocable assignment** of IP in submitted source code, documentation, and assets to **Muiaa Ltd** and the broader community, in consideration of competing for prizes (**§2.1**) |
+| Use of submission | Public benefit via public GitHub; Muiaa Ltd and community may **modify, distribute, and commercialize** globally (**§2.2**) |
+| Moral rights | Waived under the **Copyright Act of Kenya**; credit as **“Original Contributors”** where applicable (**§2.3**) |
+| Originality / OSS libs | Original work; disclose third-party libraries (e.g. `package.json`) and comply with their licenses (**§3**) |
+| Privacy | ODPA / consent via Google Form; no secrets in public repo (**§4**) |
+| Cyber conduct | **Computer Misuse and Cybercrimes Act, 2018**; no DoS / exfiltration / malicious injection on live ChamaConnect (**§5**) |
+| Prizes / tax | USD 300 / 200 / 100; **KRA** withholding (e.g. 15%); payment within **14 days** of winners’ announcement (**§6**) |
+| Deadline / appeals | Submission by **Monday 11:59 PM EAT**; judges’ decision final; appeals within **24 hours** to Muiaa technical lead (**§7**) |
+| Liability | Limitation as stated (**§8**) |
+| Governing law / venue | **Laws of the Republic of Kenya**; **exclusive jurisdiction** of **courts in Nairobi** (**§9.1**) |
 
-1. The project is officially recognized as a winning entry in the Chama Connect Virtual Hackathon.
-2. The applicable hackathon prize payout for that winning status has been fully received.
-
-The transfer becomes effective on the date the second condition is satisfied ("Trigger Date").
-
-## 3) Pre-Trigger License and Use Restrictions
-
-Before the Trigger Date:
-
-- No person or organization may use the Repository Materials for commercial purposes.
-- No person or organization may use the Repository Materials for private gain, competitive benefit, resale, sublicensing, or revenue-generating activities.
-- Use is limited to non-commercial review, hackathon evaluation, and internal development directly related to this submission.
-- No rights are granted by implication, estoppel, or otherwise beyond this limited permission.
-
-Any prohibited use before the Trigger Date is unauthorized.
-
-## 4) Post-Trigger Ownership Position
-
-On and after the Trigger Date:
-
-- The Designated Recipient Team owns the Repository Materials, subject to mandatory rights that cannot be waived by law.
-- Continued use by any other party requires prior written permission from the Designated Recipient Team.
-
-## 5) No Waiver
-
-Failure to enforce any provision immediately does not waive any right to enforce it later.
-
-## 6) Precedence
-
-If there is any inconsistency between this file and other repository documentation, this file controls to the extent of that inconsistency.
-
-## 7) Governing Terms Source
-
-These repository terms supplement, and do not replace, any mandatory organizer terms, official hackathon rules, or separately signed agreements.
-
-## 8) Governing law and dispute resolution
-
-These terms, and any dispute or claim arising out of or in connection with the Repository Materials or their subject matter, are governed by the **laws of the Republic of Kenya**, without regard to conflict-of-law rules that would apply another jurisdiction’s law.
-
-The parties submit to the **non-exclusive jurisdiction** of the courts of **Kenya** for resolution of disputes, without prejudice to any party’s right to seek interim or protective relief in any competent forum.
-
-## 9) Related legal files (read together)
-
-| File | Purpose |
-|------|---------|
-| `LICENSE` | **All rights reserved** pre-trigger; proprietary notice; reference to conditional assignment. |
-| `NOTICE` | Short third-party summary: no general commercial license; where to read full terms. |
-| `CONTRIBUTOR_SIGN_OFF.md` | Contributor representations, pre-trigger license to project/evaluators, and commit sign-off line. |
-
-These files are intended to be mutually consistent. If a substantive conflict remains between policy statements, **Section 6 (Precedence)** applies among repository policy documents; `LICENSE` states the default **all rights reserved** copyright position and does not grant rights beyond what these terms expressly permit.
+**Precedence:** If any provision in this file conflicts with the **Official Submission Terms**, the **Official Submission Terms** prevail.
 
 ---
 
-**Important:** This is a practical legal-style framework for repository governance. It should be reviewed by **qualified counsel in Kenya** before you rely on it as a final binding instrument or amend it for your entity.
+## 1) Parties and geography
+
+- **Organizers / assignee (under Official Submission Terms):** **Muiaa Ltd** (Muiaa Labs) and **Salamander Community**, in connection with the Chama Connect Virtual Hackathon in **Kenya** / **East Africa**.
+- **Participants / contributors:** individuals or teams submitting work under the hackathon rules.
+- **Designated Recipient Team (ChamaConnect Team):** as used in other repo docs, means **Muiaa Ltd** (Muiaa Labs) and/or **Salamander Community** and their authorized successors, consistent with the Official Submission Terms.
+
+## 2) Intellectual property — organizer terms control participant IP
+
+**Between participants and organizers**, intellectual property rights in the **submitted** source code, documentation, and assets are governed **solely** by **§2** of the Official Submission Terms (including irrevocable assignment and commercialization rights).
+
+Any **earlier “conditional assignment only on win + payout”** language that may appear in legacy README or proposal text is **not** a substitute for **§2.1** of the Official Submission Terms and **does not override** those terms.
+
+## 3) Third-party use of this public repository (supplementary clarity)
+
+The Official Submission Terms contemplate a **public GitHub** submission for public benefit while reserving broad rights to **Muiaa Ltd** and the community (**§2.2**).
+
+Nothing in this section grants unrelated third parties a separate commercial license. Third parties who are **not** the organizers or their authorized licensees must:
+
+- not assume unrestricted commercial exploitation rights independent of Muiaa Ltd / community rights and applicable law;
+- read the **Official Submission Terms** and this repository’s **`LICENSE`** and **`NOTICE`**.
+
+Enforcement of use of the work product is primarily a matter for **Muiaa Ltd** and the community as rights holders under the Official Submission Terms and applicable Kenyan law.
+
+## 4) Warranties, security, and conduct
+
+Participants remain subject to **§§3–5** of the Official Submission Terms (originality, third-party licenses, no credentials in public repos, **Computer Misuse and Cybercrimes Act**, prohibited attacks on live systems).
+
+## 5) Governing law and disputes (alignment with organizers)
+
+For matters governed by the **Official Submission Terms**, **§9.1** applies: **laws of the Republic of Kenya** and **exclusive jurisdiction of the courts in Nairobi**.
+
+For any dispute arising **only** from supplementary wording in this file that does not fall under the Official Submission Terms, the same **Kenyan** governing law applies, and jurisdiction shall be **Nairobi**, consistently with **§9.1**, unless a competent court directs otherwise.
+
+## 6) No waiver
+
+Failure to enforce any provision immediately does not waive any right to enforce it later.
+
+## 7) Precedence among repository files
+
+Order of control (highest first):
+
+1. **Official Submission Terms** (`docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf`)
+2. This file (`REPOSITORY_TERMS.md`)
+3. Other repository policy text where consistent with (1) and (2)
+
+## 8) Related legal files (read together)
+
+| File | Purpose |
+|------|---------|
+| `docs/...pdf` | **Official Submission Terms** — primary binding document |
+| `LICENSE` | Copyright / all rights reserved framing; points to organizer terms and this file |
+| `NOTICE` | Short third-party summary |
+| `CONTRIBUTOR_SIGN_OFF.md` | Contributor acceptance and sign-off line |
+
+---
+
+**Important:** This is supplementary guidance. **Qualified counsel in Kenya** should review the Official Submission Terms and your specific situation before you rely on this package as final.

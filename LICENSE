@@ -1,13 +1,20 @@
-Copyright (c) 2026 the repository contributors (pre-assignment).
+Copyright (c) 2026 the hackathon participants and, upon valid submission under the
+Official Submission Terms, Muiaa Ltd and the broader community as assignees.
 
-All rights reserved.
+All rights reserved except as stated in the binding organizer document:
 
-This software and associated documentation files (the "Software") are
-proprietary and confidential except as expressly stated in REPOSITORY_TERMS.md.
+  docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf
 
-No license to use, copy, modify, merge, publish, distribute, sublicense,
-and/or sell copies of the Software is granted except as explicitly set out
-in REPOSITORY_TERMS.md.
+("Official Submission Terms" — ChamaConnect Hackathon: Source Code Submission
+Terms & Conditions)
+
+No license to use, copy, modify, merge, publish, distribute, sublicense, or sell
+copies of the Software is granted to unrelated third parties except as follows:
+
+- Rights as between **participants and organizers** (including irrevocable IP
+  assignment and commercialization rights) are governed solely by the Official
+  Submission Terms (see especially §2).
+- Supplementary repository rules are in **REPOSITORY_TERMS.md** and **NOTICE**.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -17,11 +24,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
----
-
-Conditional assignment: Upon satisfaction of both conditions described in
-REPOSITORY_TERMS.md (official hackathon winner recognition and receipt of the
-associated payout), title to the Software may vest in the ChamaConnect Team
-(Muiaa Ltd (Muiaa Labs) and/or Salamander Community) as stated therein.
-
-For third-party notices and a concise use summary, see NOTICE.
+For third-party notices, see NOTICE.

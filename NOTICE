@@ -1,18 +1,26 @@
-ChamaConnect Hackathon Submission — Proprietary Notice
+ChamaConnect Hackathon — Third-party notice
 
-Copyright (c) 2026 the repository contributors (prior to any assignment).
+1) Official terms (binding)
 
-This repository and its contents are NOT open source for general commercial
-or private-benefit use. All rights reserved. See LICENSE.
+The ChamaConnect Hackathon "Source Code Submission Terms & Conditions" are
+available in this repository at:
 
-Binding use, assignment, and restrictions (including Kenya governing law) are
-defined in REPOSITORY_TERMS.md. Until the conditional assignment trigger
-described there is satisfied, you may not use this work commercially or for
-your own financial or competitive benefit except as the limited exceptions in
-that file allow (e.g. non-commercial evaluation).
+  docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf
 
-ChamaConnect Team (assignee upon trigger): Muiaa Ltd (Muiaa Labs) and/or
-Salamander Community — same region as this submission (Kenya / East Africa).
+Those terms (Kenya law; Nairobi jurisdiction per the PDF) govern participation,
+including intellectual property assignment and use rights as between participants
+and Muiaa Ltd / the community. Read the PDF before using or redistributing this work.
 
-Questions: contact the hackathon organizers or repository owner listed in
-README.md or HACKATHON_PROPOSAL.md.
+2) No assumption of a public OSS license
+
+This repository is not offered under a permissive open-source license for
+unrelated third parties. See LICENSE and REPOSITORY_TERMS.md.
+
+3) Organizers / region
+
+Muiaa Ltd (Muiaa Labs) and Salamander Community — hackathon aligned with Kenya /
+East Africa.
+
+4) Questions
+
+Contact the hackathon organizers or see README.md / HACKATHON_PROPOSAL.md.

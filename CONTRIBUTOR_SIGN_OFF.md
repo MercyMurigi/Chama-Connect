@@ -6,43 +6,46 @@ proposed code or text, or direct commits), you agree to the following.
 ## 1) You have authority to contribute
 
 You represent that you are the author of your contribution or have all rights
-necessary to submit it under these terms.
+necessary to submit it under the **Official Submission Terms** and these
+repository rules.
 
-## 2) You accept repository terms
+## 2) You accept the Official Submission Terms and repository files
 
 You have read and agree to:
 
-- `REPOSITORY_TERMS.md` (including Kenya governing law and dispute resolution)
-- `LICENSE` (all rights reserved; limited pre-trigger permissions)
-- `NOTICE` (third-party summary)
+- **`docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf`**
+  (ChamaConnect Hackathon: Source Code Submission Terms & Conditions), including
+  **§2** (intellectual property assignment to Muiaa Ltd and the broader community,
+  open-source/public benefit intent, moral rights waiver under the Copyright Act
+  of Kenya, and **Original Contributors** credit where applicable)
+- **`REPOSITORY_TERMS.md`** (supplementary third-party and repo clarity; Kenya /
+  Nairobi alignment with the PDF)
+- **`LICENSE`** and **`NOTICE`**
 
-## 3) License grant to the project (pre-trigger)
+## 3) Hackathon submission rights
 
-Until the **Trigger Date** defined in `REPOSITORY_TERMS.md`, you grant the
-repository maintainers and the hackathon evaluators a non-exclusive,
-royalty-free, worldwide license to use, reproduce, modify, display, and
-distribute your contribution solely for:
+You grant **Muiaa Ltd**, **Salamander Community**, hackathon judges, and platform
+administrators the rights necessary to **receive, review, reproduce, modify, and
+distribute** your contribution for **hackathon administration, judging, and
+integration with ChamaConnect**, consistent with the Official Submission Terms.
 
-- hackathon judging and administration,
-- non-commercial internal development of this submission, and
-- operation of this public repository for those purposes.
+## 4) Irrevocable assignment to organizers (participant work)
 
-This grant does **not** grant the public a commercial license; third-party
-commercial use remains prohibited until and unless the Designated Recipient Team
-permits it after assignment or separately in writing.
+You acknowledge that, **upon valid hackathon submission under the Official
+Submission Terms**, **§2.1** provides for **irrevocable assignment** of
+intellectual property rights in the **submitted** source code, documentation, and
+assets to **Muiaa Ltd** and the broader community, together with the rights
+described in **§2.2** (including modification, distribution, and global
+commercialization), subject only to mandatory rights under Kenyan law.
 
-## 4) Assignment on trigger
-
-You acknowledge that upon satisfaction of **both** conditions in
-`REPOSITORY_TERMS.md` (winner recognition **and** payout received), ownership of
-the Repository Materials (including your contributions) may vest in the
-ChamaConnect Team (Muiaa Ltd (Muiaa Labs) and/or Salamander Community) as
-described therein, without further action from you where permitted by law.
+This acknowledgment is **in addition to** any separate organizer form or
+declaration you sign (e.g. Google Form consent under the Data Protection Act,
+2019).
 
 ## 5) Sign-off line (for commits)
 
 When making a contribution, include this line in your commit message (adapt the
-name/email if you use a different legal identity for the hackathon):
+name/email to match your hackathon identity):
 
 ```text
 Signed-off-by: Your Legal Name <your.email@example.com>
@@ -53,5 +56,5 @@ that contribution.
 
 ---
 
-This document is not a substitute for legal advice. If you are unsure, consult
-qualified counsel in Kenya before contributing.
+This document is not a substitute for legal advice. Consult **qualified counsel
+in Kenya** if you are unsure.

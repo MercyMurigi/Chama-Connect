@@ -58,17 +58,18 @@ Payout note from prior brief: prizes are paid within 14 days and may be subject 
 
 ## IP and Licensing Note
 
-Based on the provided brief, submission implies an irrevocable transfer of IP rights to Muiaa Ltd and the community, while contributor attribution is retained as "Original Contributor."  
-Confirm final legal language with official event terms before final submission.
+The **official** position is in  
+[`docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf`](docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf):
 
-## Repository Ownership and Use Terms
+- **§2.1** — participants **irrevocably assign** IP in submitted source code, documentation, and assets to **Muiaa Ltd** and the broader community (in consideration of competing for prizes).
+- **§2.2** — public GitHub for public benefit; Muiaa Ltd and the community may **modify, distribute, and commercialize** globally.
+- **§2.3** — moral rights waived under the **Copyright Act of Kenya**; credit as **“Original Contributors”** where applicable.
 
-This repository adopts a conditional ownership and usage framework documented in `REPOSITORY_TERMS.md` (**governing law: Republic of Kenya**), together with `LICENSE` (all rights reserved), `NOTICE` (third-party clarity), and `CONTRIBUTOR_SIGN_OFF.md` (contributions).
+Governing law and venue: **§9.1** — laws of **Kenya**; **exclusive jurisdiction** of **courts in Nairobi**.
 
-- Ownership transfers to the ChamaConnect Team (Muiaa Ltd (Muiaa Labs) and/or Salamander Community) only if:
-  1. this project is officially declared a hackathon winner; and
-  2. the corresponding hackathon payout has been received.
-- Before those two conditions are met, commercial use and private-benefit use are prohibited except limited non-commercial review/evaluation/internal development as defined in `REPOSITORY_TERMS.md`.
+## Repository Ownership and Use Terms (supplementary)
+
+`REPOSITORY_TERMS.md`, `LICENSE`, `NOTICE`, and `CONTRIBUTOR_SIGN_OFF.md` explain how this **GitHub copy** relates to third parties and contributors. They do **not** replace or narrow **§2** of the PDF. If anything in markdown conflicts with the PDF, **the PDF wins**.
 
 ## Repo-Specific Implementation Priorities
 

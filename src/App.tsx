@@ -17,7 +17,16 @@ import {
   ArrowLeft,
   Settings,
   ShieldCheck,
-  DollarSign
+  DollarSign,
+  ArrowRight,
+  Shield,
+  Zap,
+  BarChart3,
+  Globe,
+  Star,
+  LogOut,
+  Menu,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
@@ -28,6 +37,7 @@ import { cn } from '@/lib/utils';
 type Page = 'dashboard' | 'my-chamas' | 'members' | 'income' | 'fines' | 'goals' | 'shares' | 'settings' | 'contributions' | 'loans' | 'expenses';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activePage, setActivePage] = useState<Page>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isChamasExpanded, setIsChamasExpanded] = useState(true);
@@ -50,6 +60,10 @@ export default function App() {
       default: return <div className="p-8 text-neutral-400">Page coming soon: {activePage}</div>;
     }
   };
+
+  if (!isAuthenticated) {
+    return <LandingPage onGetStarted={() => setIsAuthenticated(true)} />;
+  }
 
   return (
     <div className="flex h-screen bg-white font-sans text-neutral-900 border-t border-neutral-100">
@@ -143,12 +157,14 @@ export default function App() {
               <button className="p-1 hover:text-emerald-500 transition-colors"><MessageSquare className="w-5 h-5" /></button>
             </div>
             <div className="flex items-center gap-2 pl-4 border-l border-neutral-100">
-              <Avatar className="h-8 w-8 bg-neutral-100 flex items-center justify-center text-[10px] font-bold text-neutral-400">
-                <AvatarFallback>KI</AvatarFallback>
-              </Avatar>
-              <div className="flex items-center gap-1 cursor-pointer hover:text-emerald-600 group transition-colors">
-                <span className="text-[13px] font-semibold whitespace-nowrap text-[#111827]">Kevin Isom</span>
-                <ChevronDown className="w-4 h-4 text-neutral-400 group-hover:text-emerald-500" />
+              <div className="flex items-center gap-2 cursor-pointer hover:bg-neutral-50 px-2 py-1 rounded-lg transition-all group" onClick={() => setIsAuthenticated(false)}>
+                <Avatar className="h-8 w-8 bg-neutral-100 flex items-center justify-center text-[10px] font-bold text-neutral-400">
+                  <AvatarFallback>KI</AvatarFallback>
+                </Avatar>
+                <div className="flex items-center gap-1">
+                  <span className="text-[13px] font-semibold whitespace-nowrap text-[#111827]">Kevin Isom</span>
+                  <LogOut className="w-3.5 h-3.5 text-neutral-400 group-hover:text-rose-500 transition-colors" />
+                </div>
               </div>
             </div>
           </div>
@@ -176,6 +192,480 @@ export default function App() {
         </main>
       </div>
     </div>
+  );
+}
+
+function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2 cursor-pointer group">
+            <div className="flex items-center gap-2 px-3 py-1.5 border border-neutral-200 rounded-lg bg-white shadow-sm group-hover:border-emerald-200 group-hover:shadow-emerald-50 transition-all">
+              <div className="w-8 h-8 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 3l8.5 5v7L12 20l-8.5-5V8L12 3z" />
+                  <path d="M12 8l4 2.5v3l-4 2.5-4-2.5v-3z" />
+                </svg>
+              </div>
+              <span className="text-xl font-bold tracking-tight text-neutral-800">ChamaConnect</span>
+            </div>
+          </div>
+
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-8">
+            {['Home', 'Features', 'Pricing', 'Company'].map((item) => (
+              <a key={item} href="#" className={cn(
+                "text-sm font-semibold transition-colors",
+                item === 'Home' ? "text-emerald-600 underline underline-offset-4 decoration-2" : "text-neutral-600 hover:text-emerald-600"
+              )}>
+                {item} {item === 'Company' && <ChevronDown className="inline w-3 h-3 ml-1" />}
+              </a>
+            ))}
+          </div>
+
+          <div className="hidden md:flex items-center gap-4">
+            <button className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors">
+              <Moon className="w-5 h-5" />
+            </button>
+            <Button className="bg-[#10b981] hover:bg-[#059669] text-white px-6 h-10 rounded-lg font-bold text-sm shadow-sm transition-all" onClick={onGetStarted}>
+              Get Started
+            </Button>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button className="md:hidden p-2 text-neutral-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Nav */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-white border-b border-neutral-100 overflow-hidden"
+            >
+              <div className="px-6 py-8 flex flex-col gap-6">
+                {['Home', 'Features', 'Pricing', 'Company'].map((item) => (
+                  <a key={item} href="#" className="text-lg font-bold text-neutral-900">{item}</a>
+                ))}
+                <hr className="border-neutral-100" />
+                <Button className="bg-emerald-600 w-full h-14 rounded-2xl font-bold" onClick={onGetStarted}>Get Started Free</Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="pt-48 pb-24 px-6 relative">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="space-y-6"
+          >
+            <div className="text-emerald-600 font-bold tracking-tight text-sm px-1 flex items-center gap-2">
+              Secure • Transparent • Automated
+            </div>
+            <h1 className="text-6xl md:text-7xl font-black text-neutral-900 leading-[1.1] tracking-tighter">
+              The Future of <br />
+              Chamas is Here
+            </h1>
+            <p className="text-lg text-neutral-500 max-w-lg leading-relaxed font-medium">
+              Secure, transparent, and automated financial management platform built on blockchain technology for African savings groups.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
+              <Button className="w-full sm:w-auto bg-[#10b981] hover:bg-[#059669] text-white px-8 h-14 rounded-lg font-bold text-lg shadow-lg shadow-emerald-200/50 group" onClick={onGetStarted}>
+                Get Started
+                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Button>
+              <Button variant="outline" className="w-full sm:w-auto h-14 px-8 rounded-lg font-bold text-lg border-neutral-200 text-neutral-900 hover:bg-neutral-50" onClick={onGetStarted}>
+                Product Demo
+              </Button>
+            </div>
+          </motion.div>
+
+          {/* Phone Mockup Section */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative flex justify-center lg:justify-end"
+          >
+            {/* Background Decorative Pattern */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] -z-10 flex items-center justify-center opacity-20 pointer-events-none">
+              <div className="w-full h-full max-w-md aspect-square bg-emerald-100 rounded-full blur-[100px]" />
+              <svg className="absolute w-full h-full text-emerald-600 opacity-20" viewBox="0 0 200 200">
+                <path fill="currentColor" d="M40,-62.1C51.2,-54.1,59.2,-42.6,66.1,-30.2C73,-17.8,78.8,-4.5,77,8.2C75.2,20.9,65.8,33,56.1,43.2C46.3,53.3,36.2,61.4,24.3,66.1C12.4,70.9,-1.2,72.3,-14.8,69.5C-28.3,66.7,-41.7,59.7,-52.1,49.5C-62.5,39.3,-69.8,25.9,-72.6,11.5C-75.3,-2.9,-73.4,-18.2,-66.2,-30.8C-59,-43.3,-46.5,-53,-34,-60.2C-21.4,-67.4,-8.7,-72.1,2.8,-76.3C14.3,-80.6,28.7,-70.2,40,-62.1Z" transform="translate(100 100)" />
+              </svg>
+            </div>
+
+            <div className="relative flex items-center justify-center">
+              {/* Back Phone */}
+              <div className="bg-neutral-900 w-[240px] aspect-[9/19] rounded-[40px] border-[8px] border-neutral-800 shadow-2xl relative overflow-hidden -rotate-6 translate-x-12 translate-y-6">
+                <img src="https://picsum.photos/seed/mobile1/600/1200" className="w-full h-full object-cover grayscale opacity-50" referrerPolicy="no-referrer" />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/90 to-transparent p-6 flex flex-col justify-end">
+                   <div className="space-y-2">
+                     <div className="h-4 w-20 bg-emerald-500 rounded-full" />
+                     <div className="h-4 w-full bg-white/20 rounded-full" />
+                     <div className="h-4 w-2/3 bg-white/20 rounded-full" />
+                   </div>
+                </div>
+              </div>
+              {/* Front Phone */}
+              <div className="bg-neutral-900 w-[260px] aspect-[9/19] rounded-[48px] border-[10px] border-neutral-800 shadow-[20px_40px_80px_rgba(0,0,0,0.3)] relative overflow-hidden z-10">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-neutral-800 rounded-b-2xl z-20" />
+                <div className="relative h-full bg-emerald-600">
+                  <img src="https://picsum.photos/seed/kulture/800/1600" className="absolute inset-0 w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  <div className="absolute inset-0 bg-emerald-600/30 backdrop-blur-[1px]" />
+                  <div className="absolute inset-0 p-8 flex flex-col justify-center items-center text-center">
+                    <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md mb-6 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" fill="none" className="w-10 h-10 text-white" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 3l8.5 5v7L12 20l-8.5-5V8L12 3z" />
+                        <path d="M12 8l4 2.5v3l-4 2.5-4-2.5v-3z" />
+                      </svg>
+                    </div>
+                    <span className="text-2xl font-black text-white tracking-tighter">ChamaConnect</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Trusted By Section */}
+      <section className="py-20 border-b border-neutral-100 bg-[#F9FAFB]/30">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-center text-[10px] font-bold uppercase text-neutral-400 tracking-[0.2em] mb-12">Trusted by Leading Organizations</p>
+          <div className="flex flex-wrap justify-center items-center gap-x-16 gap-y-10">
+            {['NAIROBI CITY COUNTY', 'COMPUTER AID', 'Women of Destiny', 'HEP', 'NAIROBI CITY COUNCIL'].map((name, i) => (
+              <div key={i} className="bg-white px-6 py-4 rounded-xl border border-neutral-200/50 shadow-sm flex items-center gap-3 grayscale hover:grayscale-0 transition-all opacity-60 hover:opacity-100 group cursor-default">
+                 <div className="w-8 h-8 rounded-full bg-neutral-50 flex items-center justify-center p-1.5 border border-neutral-100 group-hover:border-emerald-200 transition-colors">
+                   {i % 2 === 0 ? <Globe className="w-full h-full text-emerald-500" /> : <ShieldCheck className="w-full h-full text-blue-500" />}
+                 </div>
+                 <span className="font-bold text-xs tracking-tight text-neutral-800">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Discovery Section */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+          <div className="relative group">
+            <div className="absolute -inset-4 bg-emerald-500/10 rounded-[3rem] blur-2xl opacity-0 group-hover:opacity-100 transition-duration-500" />
+            <img 
+              src="https://picsum.photos/seed/working/1200/800" 
+              className="rounded-[2.5rem] shadow-[20px_40px_80px_rgba(0,0,0,0.1)] relative z-10 w-full hover:scale-[1.02] transition-transform duration-500"
+              alt="Person working"
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <div className="space-y-8">
+            <div className="text-emerald-500 font-bold tracking-[0.2em] text-xs uppercase">Discover</div>
+            <h2 className="text-5xl font-black text-neutral-900 leading-tight tracking-tight">How Our Table Banking <br /> System Works</h2>
+            <div className="space-y-6 text-neutral-500 font-medium leading-relaxed">
+              <p>ChamaConnect streamlines table banking with innovative tools designed for Kenyan groups, blending blockchain security with user-friendly fintech solutions.</p>
+              <p>This solution addresses the operational inefficiencies commonly faced by Chama groups, such as manual record-keeping, lack of transparency, and financial mismanagement.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-8 pt-4">
+               {[
+                 { icon: <Users className="w-6 h-6" />, title: 'Member Network' },
+                 { icon: <DollarSign className="w-6 h-6" />, title: 'Real-time Fund' },
+                 { icon: <Wallet className="w-6 h-6" />, title: 'Secure Loans' },
+                 { icon: <BarChart3 className="w-6 h-6" />, title: 'Smart Growth' }
+               ].map((item, i) => (
+                 <div key={i} className="flex items-center gap-4 group">
+                    <div className="w-12 h-12 rounded-xl bg-neutral-50 border border-neutral-100 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm">
+                      {item.icon}
+                    </div>
+                    <span className="font-bold text-neutral-800 tracking-tight">{item.title}</span>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid (Light) */}
+      <section className="py-24 px-6 bg-[#F9FAFB]/50">
+        <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <ProcessCard 
+            icon={<Users className="w-6 h-6" />}
+            title="Create or Join a Group"
+            description="Set up a new table banking group in minutes or join an existing one using email, SMS, or shareable links, with customizable settings for savings and loans tailored to your needs."
+          />
+          <ProcessCard 
+            icon={<DollarSign className="w-6 h-6" />}
+            title="Manage Finances"
+            description="Track contributions and group savings in real-time via intuitive dashboards, set auto-reminders for timely payments, and monitor financial goals effortlessly, all managed by admins through a sleek interface."
+          />
+          <ProcessCard 
+            icon={<Wallet className="w-6 h-6" />}
+            title="Simplify Loans and Savings"
+            description="Apply for loans instantly on the platform, define repayment terms with automated interest tracking, and manage savings securely—eliminating manual errors and boosting group trust with blockchain precision."
+          />
+          <ProcessCard 
+            icon={<BarChart3 className="w-6 h-6" />}
+            title="Generate Financial Reports"
+            description="Access instant, detailed reports on savings, loans, and expenses, share them with members for transparency, and leverage insights to drive smart financial decisions, all powered by professional-grade accounting tools."
+          />
+        </div>
+      </section>
+
+      {/* Dark Who We Are Section */}
+      <section className="py-32 px-6 bg-[#111827] text-white overflow-hidden relative">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
+           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
+           <div className="absolute bottom-0 left-0 w-64 h-64 border border-emerald-500/20 rounded-full scale-[5] opacity-50" />
+           <div className="absolute inset-0 grid grid-cols-12 gap-0 opacity-5">
+              {[...Array(48)].map((_, i) => (
+                <div key={i} className="aspect-square border border-emerald-500/20 rounded-full m-1" />
+              ))}
+           </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-20 space-y-6">
+            <div className="text-emerald-500 font-bold uppercase tracking-[0.3em] text-[10px]">Who We Are</div>
+            <h2 className="text-6xl font-black tracking-tight leading-tight">Built for African Savings Groups</h2>
+            <p className="text-neutral-400 text-lg font-medium leading-relaxed">We understand the unique needs of African communities. Our platform combines traditional values with cutting-edge technology to empower financial growth.</p>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            <ChamaTypeCard 
+              image="https://picsum.photos/seed/table/800/600"
+              title="Table Banking Groups"
+              description="ChamaConnect helps table banking groups by pooling savings, disbursing loans, tracking guarantors, and managing fines."
+            />
+            <ChamaTypeCard 
+              image="https://picsum.photos/seed/sacco/800/600"
+              title="Sacco Groups"
+              description="The platform's streamlined features help handle contributions, structured loans, dividends, and guarantor-based loan approvals."
+            />
+            <ChamaTypeCard 
+              image="https://picsum.photos/seed/merry/800/600"
+              title="Merry-Go Round Groups"
+              description="This simplified system aids in managing contributions, tracking beneficiaries, and maintaining rotation schedules."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Trusted Platform Grid */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
+            <h2 className="text-6xl font-black text-neutral-900 tracking-tighter">The Most Trusted Chama Platform</h2>
+            <p className="text-lg text-neutral-500 font-medium leading-relaxed">Experience the power of blockchain technology designed specifically for African savings groups. Professional features that preserve cultural practices with modern innovation.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCardDetailed 
+              icon={<ShieldCheck className="w-6 h-6" />}
+              title="Immutable Records"
+              tag="Blockchain Security"
+              description="Built on secure blockchain infrastructure with immutable transaction records. Your group's financial data is protected with enterprise-grade security."
+            />
+            <FeatureCardDetailed 
+              icon={<Zap className="w-6 h-6" />}
+              title="Modern Tech Stack"
+              tag="TypeScript"
+              description="Built with Next.js 15, TypeScript, and React 19. Professional development tools ensure top-tier performance and security."
+            />
+            <FeatureCardDetailed 
+              icon={<Plus className="w-6 h-6" />}
+              title="Smart Automation"
+              tag="Automated"
+              description="Automated loan management, contribution tracking, and penalty calculations. Smart logic ensures transparent and fair financial processes."
+            />
+            <FeatureCardDetailed 
+              icon={<Globe className="w-6 h-6" />}
+              title="Kenyan Market Focus"
+              tag="Local Focus"
+              description="Designed specifically for Kenyan Chama groups with local currency support, cultural understanding, and .co.ke experience."
+            />
+            <FeatureCardDetailed 
+              icon={<BarChart3 className="w-6 h-6" />}
+              title="Comprehensive Analytics"
+              tag="Real-time Data"
+              description="Real-time financial reporting, member tracking, and growth analytics. Generate unlimited reports with advanced dashboards."
+            />
+            <FeatureCardDetailed 
+              icon={<ArrowRight className="w-6 h-6" />}
+              title="Scalable Plans"
+              tag="15 to ∞ Members"
+              description="From free starter plans for 15 members to enterprise solutions for unlimited users. Grow your platform as your Chama expands."
+            />
+          </div>
+
+          <div className="mt-16 flex justify-center gap-6">
+            <Button className="bg-[#10b981] hover:bg-[#059669] text-white px-10 h-14 rounded-lg font-black text-sm" onClick={onGetStarted}>Start Free Trial</Button>
+            <Button variant="outline" className="text-neutral-900 border-neutral-200 px-10 h-14 rounded-lg font-black text-sm hover:bg-neutral-50">View Features</Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Section */}
+      <section className="py-24 px-6 relative overflow-hidden bg-emerald-50/30">
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+           <div className="absolute inset-0 grid grid-cols-12 gap-0">
+              {[...Array(24)].map((_, i) => (
+                <div key={i} className="aspect-square border border-emerald-600 rounded-full m-2" />
+              ))}
+           </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto relative z-10 text-center space-y-8">
+           <div className="space-y-2">
+             <h3 className="text-2xl font-black text-neutral-900 tracking-tight">Join our newsletter</h3>
+             <p className="text-neutral-500 font-medium">Stay up to date on features and releases</p>
+           </div>
+           
+           <div className="max-w-md mx-auto relative">
+             <input 
+               type="email" 
+               placeholder="Enter your email" 
+               className="w-full pl-6 pr-12 py-4 bg-white border border-neutral-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:outline-none font-medium shadow-sm"
+             />
+             <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-emerald-600 text-white rounded-lg flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-sm">
+                <ArrowRight className="w-5 h-5" />
+             </button>
+           </div>
+        </div>
+
+        {/* Floating Up Arrow */}
+        <button 
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-8 right-8 w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all z-50 group border-4 border-white/20"
+        >
+          <ArrowRight className="w-5 h-5 -rotate-90 group-hover:-translate-y-1 transition-transform" />
+        </button>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-20 border-t border-neutral-100">
+        <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+          <div className="col-span-2 space-y-6">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white">
+                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 3l8.5 5v7L12 20l-8.5-5V8L12 3z" />
+                  <path d="M12 8l4 2.5v3l-4 2.5-4-2.5v-3z" />
+                </svg>
+              </div>
+              <span className="text-xl font-bold tracking-tight text-neutral-800">ChamaConnect</span>
+            </div>
+            <p className="text-neutral-500 font-medium leading-relaxed max-w-sm">Empowering African savings groups through secure, transparent blockchain-based financial management solutions.</p>
+          </div>
+          <div className="space-y-6">
+            <h4 className="font-bold text-neutral-900 tracking-tight">Product</h4>
+            <div className="flex flex-col gap-4 text-sm font-bold text-neutral-500">
+              <a href="#" className="hover:text-emerald-600 transition-colors">Features</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Security</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Pricing</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Resources</a>
+            </div>
+          </div>
+          <div className="space-y-6">
+            <h4 className="font-bold text-neutral-900 tracking-tight">Legal</h4>
+            <div className="flex flex-col gap-4 text-sm font-bold text-neutral-500">
+              <a href="#" className="hover:text-emerald-600 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Cookie Policy</a>
+              <a href="#" className="hover:text-emerald-600 transition-colors">Support</a>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 mt-20 pt-8 border-t border-neutral-100 flex flex-col md:row items-center justify-between gap-4">
+          <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest">© 2026 ChamaConnect SAAS • Built for African Chamas</p>
+          <div className="flex gap-6 grayscale opacity-50">
+            <div className="w-5 h-5 bg-neutral-900 rounded-full" />
+            <div className="w-5 h-5 bg-neutral-900 rounded-full" />
+            <div className="w-5 h-5 bg-neutral-900 rounded-full" />
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function ProcessCard({ icon, title, description }: { icon: any, title: string, description: string }) {
+  return (
+    <motion.div 
+      whileHover={{ y: -5 }}
+      className="bg-white p-8 rounded-3xl border border-neutral-100 shadow-sm hover:shadow-xl hover:shadow-emerald-500/5 transition-all group"
+    >
+      <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+        {icon}
+      </div>
+      <h3 className="text-xl font-black text-neutral-900 mb-4 tracking-tight leading-none">{title}</h3>
+      <p className="text-neutral-500 font-medium text-sm leading-relaxed">{description}</p>
+    </motion.div>
+  );
+}
+
+function ChamaTypeCard({ image, title, description }: { image: string, title: string, description: string }) {
+  return (
+    <motion.div 
+      whileHover={{ y: -10 }}
+      className="bg-neutral-800/50 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden group shadow-2xl"
+    >
+      <div className="h-64 relative overflow-hidden">
+        <img src={image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={title} referrerPolicy="no-referrer" />
+        <div className="absolute inset-0 bg-neutral-900/40" />
+      </div>
+      <div className="p-10 space-y-6">
+         <h3 className="text-3xl font-black text-white tracking-tight leading-none">{title}</h3>
+         <p className="text-neutral-400 font-medium leading-relaxed leading-relaxed">{description}</p>
+         <button className="text-emerald-500 font-bold hover:underline underline-offset-8 flex items-center gap-2 group/btn">
+            Learn more 
+            <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+         </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function FeatureCardDetailed({ icon, title, tag, description }: { icon: any, title: string, tag: string, description: string }) {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.02 }}
+      className="p-10 rounded-[2rem] bg-white border border-neutral-100 shadow-sm hover:shadow-2xl hover:shadow-emerald-100 transition-all group"
+    >
+      <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform">
+        {icon}
+      </div>
+      <h3 className="text-2xl font-black text-neutral-900 mb-2 tracking-tight leading-none">{title}</h3>
+      <div className="text-emerald-500 font-bold text-xs uppercase tracking-widest mb-4">{tag}</div>
+      <p className="text-neutral-500 font-medium leading-relaxed text-sm">{description}</p>
+    </motion.div>
+  );
+}
+
+function FeatureCard({ icon, title, description, color, bgColor }: { icon: any, title: string, description: string, color: string, bgColor: string }) {
+  return (
+    <motion.div 
+      whileHover={{ y: -10 }}
+      className="p-10 rounded-[2.5rem] bg-white border border-neutral-100 shadow-sm hover:shadow-2xl hover:shadow-emerald-100 transition-all group"
+    >
+      <div className={cn("w-16 h-16 rounded-[1.25rem] flex items-center justify-center mb-10 transition-transform group-hover:rotate-6 shadow-sm", bgColor, color)}>
+        {icon}
+      </div>
+      <h3 className="text-2xl font-black text-neutral-900 mb-4 tracking-tight leading-none">{title}</h3>
+      <p className="text-neutral-500 font-medium leading-relaxed leading-relaxed">{description}</p>
+    </motion.div>
   );
 }
 

@@ -57,7 +57,7 @@ export const TESTIMONIALS = [
     id: 't1',
     name: 'Sarah Kimani',
     role: 'Treasurer, Upendo Women Chama',
-    content: 'ChamaConnect transformed our records. We used to spend hours manually balancing books. Now, everything is instant.',
+    content: 'ChamaConnect 2.0 transformed our records. We used to spend hours manually balancing books. Now, everything is instant.',
     avatar: 'https://picsum.photos/seed/sarah/100/100'
   },
   {

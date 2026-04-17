@@ -145,3 +145,12 @@ Planned:
 ## 12) Notes
 
 This proposal is intentionally structured as a living document and should be updated as implementation is finalized.
+
+## 13) Repository Ownership and Use Position
+
+The legal use position for this submission repository is defined under **Kenyan law** in `REPOSITORY_TERMS.md`, with `LICENSE` (all rights reserved), `NOTICE`, and `CONTRIBUTOR_SIGN_OFF.md` as companion files. Summarized as follows:
+
+- Ownership transfers to the ChamaConnect Team (Muiaa Ltd (Muiaa Labs) and/or Salamander Community) only after both trigger conditions occur:
+  1. official winner recognition, and
+  2. receipt of the associated payout.
+- Until both conditions occur, third-party commercial use and private-benefit use are not permitted.

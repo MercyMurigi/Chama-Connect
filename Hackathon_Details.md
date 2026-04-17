@@ -3,7 +3,7 @@
 This document captures the project-aligned hackathon brief for this repository.
 
 <div align="center">
-<img width="1200" height="475" alt="Chama Connect Virtual Hackathon official announcement poster" src="./Chama-Connect_Announcement.jpeg" />
+<img width="1200" height="auto" alt="Chama Connect Virtual Hackathon official announcement poster" src="./Chama-Connect_Announcement.jpeg" />
 </div>
 
 ## Event Overview
@@ -60,6 +60,15 @@ Payout note from prior brief: prizes are paid within 14 days and may be subject 
 
 Based on the provided brief, submission implies an irrevocable transfer of IP rights to Muiaa Ltd and the community, while contributor attribution is retained as "Original Contributor."  
 Confirm final legal language with official event terms before final submission.
+
+## Repository Ownership and Use Terms
+
+This repository adopts a conditional ownership and usage framework documented in `REPOSITORY_TERMS.md` (**governing law: Republic of Kenya**), together with `LICENSE` (all rights reserved), `NOTICE` (third-party clarity), and `CONTRIBUTOR_SIGN_OFF.md` (contributions).
+
+- Ownership transfers to the ChamaConnect Team (Muiaa Ltd (Muiaa Labs) and/or Salamander Community) only if:
+  1. this project is officially declared a hackathon winner; and
+  2. the corresponding hackathon payout has been received.
+- Before those two conditions are met, commercial use and private-benefit use are prohibited except limited non-commercial review/evaluation/internal development as defined in `REPOSITORY_TERMS.md`.
 
 ## Repo-Specific Implementation Priorities
 

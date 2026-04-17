@@ -5,7 +5,7 @@ Hackathon project for improving ChamaConnect, a digital platform for managing ch
 Theme alignment: `ChamaConnect: Refactored - Scaling the Circle`
 
 <div align="center">
-<img width="1200" height="475" alt="Chama Connect Virtual Hackathon official announcement poster" src="./Chama-Connect_Announcement.jpeg" />
+<img width="1200" height="auto" alt="Chama Connect Virtual Hackathon official announcement poster" src="./Chama-Connect_Announcement.jpeg" />
 </div>
 
 ---
@@ -125,3 +125,6 @@ Use this sequence to quickly evaluate the current implementation:
 
 - No credentials are committed in this repository.
 - Event timing and legal terms should be confirmed against the latest official organizer communication before final submission.
+- **Legal bundle (Kenya-oriented):** `REPOSITORY_TERMS.md` (governing law: Kenya), `LICENSE` (all rights reserved pre-trigger), `NOTICE` (third-party summary), `CONTRIBUTOR_SIGN_OFF.md` (contributor sign-off).
+- Repository ownership and usage restrictions are governed by `REPOSITORY_TERMS.md`.
+- Commercial use or private-benefit use is prohibited before the conditional assignment trigger defined in `REPOSITORY_TERMS.md`.

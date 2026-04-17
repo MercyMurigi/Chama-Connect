@@ -27,6 +27,7 @@ import {
   LogOut,
   Menu,
   X,
+  Receipt,
 } from 'lucide-react';
 import { useChama } from './domain/chamaContext';
 import { DashboardView } from './views/DashboardView';
@@ -63,12 +64,8 @@ export default function App() {
         return <MembersView groupName={selectedChama} />;
       case 'contributions':
         return <ContributionsView groupName={selectedChama} />;
-      case 'income':
-        return <IncomeView groupName={selectedChama} />;
-      case 'loans':
-        return <LoansView groupName={selectedChama} />;
-      case 'expenses':
-        return <ExpensesView groupName={selectedChama} />;
+      case 'finances':
+        return <FinancesView groupName={selectedChama} />;
       case 'shares':
         return <SharesView groupName={selectedChama} />;
       case 'settings':
@@ -155,9 +152,7 @@ export default function App() {
                 <SubMenuItem label="Back to My Chamas" onClick={() => setActivePage('my-chamas')} isActive={activePage === 'my-chamas'} />
                 <SubMenuItem label="Members" onClick={() => setActivePage('members')} isActive={activePage === 'members'} />
                 <SubMenuItem label="Contributions" onClick={() => setActivePage('contributions')} isActive={activePage === 'contributions'} />
-                <SubMenuItem label="Income" onClick={() => setActivePage('income')} isActive={activePage === 'income'} />
-                <SubMenuItem label="Loans" onClick={() => setActivePage('loans')} isActive={activePage === 'loans'} />
-                <SubMenuItem label="Expenses" onClick={() => setActivePage('expenses')} isActive={activePage === 'expenses'} />
+                <SubMenuItem label="Finances" onClick={() => setActivePage('finances')} isActive={activePage === 'finances'} />
                 <SubMenuItem label="Fines" onClick={() => setActivePage('fines')} isActive={activePage === 'fines'} />
                 <SubMenuItem label="Cases (ICDMS)" onClick={() => setActivePage('cases')} isActive={activePage === 'cases'} />
                 <SubMenuItem label="M-Pesa sim" onClick={() => setActivePage('mpesa')} isActive={activePage === 'mpesa'} />
@@ -1305,56 +1300,232 @@ function StatItem({ label, value, sub, icon, color, containerColor }: { label: s
   );
 }
 
-function IncomeView({ groupName }: { groupName: string }) {
+type FinancesTab = 'income' | 'loans' | 'expenses';
+
+function FinancesView({ groupName }: { groupName: string }) {
+  const [tab, setTab] = useState<FinancesTab>('income');
   const { state } = useChama();
+
+  const tabs = [
+    {
+      id: 'income' as const,
+      label: 'Income',
+      hint: 'Credits & inflows',
+      Icon: TrendingUp,
+      count: state.income.length,
+    },
+    {
+      id: 'loans' as const,
+      label: 'Loans',
+      hint: 'Lending book',
+      Icon: CreditCard,
+      count: state.loans.length,
+    },
+    {
+      id: 'expenses' as const,
+      label: 'Expenses',
+      hint: 'Spend & payouts',
+      Icon: Receipt,
+      count: state.expenses.length,
+    },
+  ];
+
+  const headerActions =
+    tab === 'income' ? (
+      <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 px-4 shadow-sm font-bold text-sm">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Import
+      </Button>
+    ) : tab === 'loans' ? (
+      <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+        <Plus className="w-5 h-5" />
+        New Loan Application
+      </Button>
+    ) : (
+      <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+        <Plus className="w-5 h-5" />
+        Record Expense
+      </Button>
+    );
+
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
       <PageHeader
         title={groupName}
-        subtitle="Income"
+        subtitle="Finances — income, loans, and expenses in one workspace"
         breadcrumb={`Back to ${groupName}`}
-        actions={
-          <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 px-4 shadow-sm font-bold text-sm">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            Import
-          </Button>
-        }
+        actions={headerActions}
       />
 
-      <div className="bg-white rounded-xl border border-neutral-100 shadow-sm min-h-[400px] flex flex-col">
-        <div className="px-8 py-6 border-b border-neutral-50 bg-[#F9FAFB]/30">
-          <h3 className="text-lg font-bold text-neutral-900 tracking-tight">Income</h3>
+      <div
+        className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+        role="tablist"
+        aria-label="Finances sections"
+      >
+        <div className="inline-flex w-full max-w-2xl flex-wrap gap-1 rounded-2xl border border-neutral-200/80 bg-white p-1 shadow-sm">
+          {tabs.map(({ id, label, hint, Icon, count }) => {
+            const selected = tab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={selected ? 'true' : 'false'}
+                onClick={() => setTab(id)}
+                className={cn(
+                  'flex min-w-0 flex-1 items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all sm:min-w-[140px]',
+                  selected
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
+                    : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border',
+                    selected ? 'border-white/20 bg-white/15' : 'border-neutral-100 bg-neutral-50',
+                  )}
+                >
+                  <Icon className={cn('h-4 w-4 shrink-0', selected ? 'text-white' : 'text-emerald-600')} strokeWidth={2} aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    <span className="block text-sm font-bold tracking-tight">{label}</span>
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-0.5 text-[10px] font-black tabular-nums',
+                        selected ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500',
+                      )}
+                    >
+                      {count}
+                    </span>
+                  </span>
+                  <span className={cn('mt-0.5 block truncate text-[11px] font-medium', selected ? 'text-emerald-50' : 'text-neutral-400')}>
+                    {hint}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="overflow-x-auto">
-          {state.income.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-neutral-400 p-8 text-center italic font-medium">
-              No income transactions found
-            </div>
-          ) : (
-            <table className="w-full text-sm text-left">
-              <thead className="bg-[#F9FAFB] text-neutral-500 text-xs font-bold uppercase border-b border-neutral-100">
-                <tr>
-                  <th className="px-8 py-4">Source</th>
-                  <th className="px-8 py-4">Amount</th>
-                  <th className="px-8 py-4">Date</th>
-                  <th className="px-8 py-4">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.income.map((i) => (
-                  <tr key={i.id} className="border-b border-neutral-50 hover:bg-neutral-50">
-                    <td className="px-8 py-4 font-bold text-neutral-900">{i.source}</td>
-                    <td className="px-8 py-4">{formatKsh(i.amount)}</td>
-                    <td className="px-8 py-4 text-neutral-600">{i.date}</td>
-                    <td className="px-8 py-4 text-neutral-600">{i.description}</td>
+      </div>
+
+      <div className="min-h-[400px] overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm">
+        <div className="border-b border-neutral-100 bg-gradient-to-r from-neutral-50/80 to-white px-8 py-5">
+          <h2 className="text-lg font-bold tracking-tight text-neutral-900">
+            {tab === 'income' && 'Income ledger'}
+            {tab === 'loans' && 'Loans portfolio'}
+            {tab === 'expenses' && 'Expense register'}
+          </h2>
+          <p className="mt-1 text-sm text-neutral-500">
+            {tab === 'income' && 'All recorded inflows for this chama.'}
+            {tab === 'loans' && 'Track principal, interest, due dates, and status.'}
+            {tab === 'expenses' && 'Operational spend and reimbursements.'}
+          </p>
+        </div>
+
+        {tab === 'income' && (
+          <div className="overflow-x-auto">
+            {state.income.length === 0 ? (
+              <div className="flex items-center justify-center p-12 text-center text-sm font-medium italic text-neutral-400">
+                No income transactions found
+              </div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-neutral-100 bg-[#F9FAFB] text-xs font-bold uppercase text-neutral-500">
+                  <tr>
+                    <th className="px-8 py-4">Source</th>
+                    <th className="px-8 py-4">Amount</th>
+                    <th className="px-8 py-4">Date</th>
+                    <th className="px-8 py-4">Description</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+                </thead>
+                <tbody>
+                  {state.income.map((i) => (
+                    <tr key={i.id} className="border-b border-neutral-50 hover:bg-neutral-50">
+                      <td className="px-8 py-4 font-bold text-neutral-900">{i.source}</td>
+                      <td className="px-8 py-4">{formatKsh(i.amount)}</td>
+                      <td className="px-8 py-4 text-neutral-600">{i.date}</td>
+                      <td className="px-8 py-4 text-neutral-600">{i.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {tab === 'loans' && (
+          <div className="overflow-x-auto">
+            {state.loans.length === 0 ? (
+              <div className="flex items-center justify-center p-12 text-center text-sm italic text-neutral-400">No active loans found.</div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-neutral-100 bg-[#F9FAFB] text-xs font-bold uppercase text-neutral-500">
+                  <tr>
+                    <th className="px-6 py-4">Member</th>
+                    <th className="px-6 py-4">Amount</th>
+                    <th className="px-6 py-4">Interest</th>
+                    <th className="px-6 py-4">Due</th>
+                    <th className="px-6 py-4">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {state.loans.map((l) => (
+                    <tr key={l.id} className="border-b border-neutral-50 hover:bg-neutral-50">
+                      <td className="px-6 py-3 font-bold">{l.memberName}</td>
+                      <td className="px-6 py-3">{formatKsh(l.amount)}</td>
+                      <td className="px-6 py-3">{l.interest}%</td>
+                      <td className="px-6 py-3 text-neutral-600">{l.dueDate}</td>
+                      <td className="px-6 py-3">
+                        <span
+                          className={cn(
+                            'rounded-full px-2 py-0.5 text-[10px] font-black uppercase',
+                            l.status === 'Active' && 'bg-blue-50 text-blue-800',
+                            l.status === 'Paid' && 'bg-emerald-50 text-emerald-800',
+                            l.status === 'Overdue' && 'bg-rose-50 text-rose-800',
+                          )}
+                        >
+                          {l.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {tab === 'expenses' && (
+          <div className="overflow-x-auto">
+            {state.expenses.length === 0 ? (
+              <div className="flex items-center justify-center p-12 text-center text-sm italic text-neutral-400">No expenses recorded yet.</div>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead className="border-b border-neutral-100 bg-[#F9FAFB] text-xs font-bold uppercase text-neutral-500">
+                  <tr>
+                    <th className="px-6 py-4">Category</th>
+                    <th className="px-6 py-4">Amount</th>
+                    <th className="px-6 py-4">Date</th>
+                    <th className="px-6 py-4">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {state.expenses.map((e) => (
+                    <tr key={e.id} className="border-b border-neutral-50 hover:bg-neutral-50">
+                      <td className="px-6 py-3 font-bold">{e.category}</td>
+                      <td className="px-6 py-3">{formatKsh(e.amount)}</td>
+                      <td className="px-6 py-3 text-neutral-600">{e.date}</td>
+                      <td className="px-6 py-3 text-neutral-600">{e.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1782,109 +1953,6 @@ function ContributionsView({ groupName }: { groupName: string }) {
                       {c.status}
                     </span>
                   </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function LoansView({ groupName }: { groupName: string }) {
-  const { state } = useChama();
-  return (
-    <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
-      <PageHeader
-        title={groupName}
-        subtitle="Loans"
-        breadcrumb={`Back to ${groupName}`}
-        actions={
-          <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            New Loan Application
-          </Button>
-        }
-      />
-      <div className="bg-white rounded-xl border border-neutral-100 shadow-sm min-h-[400px] overflow-x-auto">
-        {state.loans.length === 0 ? (
-          <div className="flex items-center justify-center text-neutral-400 italic p-12">No active loans found.</div>
-        ) : (
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#F9FAFB] text-neutral-500 text-xs font-bold uppercase border-b border-neutral-100">
-              <tr>
-                <th className="px-6 py-4">Member</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Interest</th>
-                <th className="px-6 py-4">Due</th>
-                <th className="px-6 py-4">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {state.loans.map((l) => (
-                <tr key={l.id} className="border-b border-neutral-50 hover:bg-neutral-50">
-                  <td className="px-6 py-3 font-bold">{l.memberName}</td>
-                  <td className="px-6 py-3">{formatKsh(l.amount)}</td>
-                  <td className="px-6 py-3">{l.interest}%</td>
-                  <td className="px-6 py-3 text-neutral-600">{l.dueDate}</td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={cn(
-                        'text-[10px] font-black uppercase px-2 py-0.5 rounded-full',
-                        l.status === 'Active' && 'bg-blue-50 text-blue-800',
-                        l.status === 'Paid' && 'bg-emerald-50 text-emerald-800',
-                        l.status === 'Overdue' && 'bg-rose-50 text-rose-800',
-                      )}
-                    >
-                      {l.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function ExpensesView({ groupName }: { groupName: string }) {
-  const { state } = useChama();
-  return (
-    <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
-      <PageHeader
-        title={groupName}
-        subtitle="Expenses"
-        breadcrumb={`Back to ${groupName}`}
-        actions={
-          <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Record Expense
-          </Button>
-        }
-      />
-      <div className="bg-white rounded-xl border border-neutral-100 shadow-sm min-h-[400px] overflow-x-auto">
-        {state.expenses.length === 0 ? (
-          <div className="flex items-center justify-center text-neutral-400 italic p-12">No expenses recorded yet.</div>
-        ) : (
-          <table className="w-full text-sm text-left">
-            <thead className="bg-[#F9FAFB] text-neutral-500 text-xs font-bold uppercase border-b border-neutral-100">
-              <tr>
-                <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {state.expenses.map((e) => (
-                <tr key={e.id} className="border-b border-neutral-50 hover:bg-neutral-50">
-                  <td className="px-6 py-3 font-bold">{e.category}</td>
-                  <td className="px-6 py-3">{formatKsh(e.amount)}</td>
-                  <td className="px-6 py-3 text-neutral-600">{e.date}</td>
-                  <td className="px-6 py-3 text-neutral-600">{e.description}</td>
                 </tr>
               ))}
             </tbody>

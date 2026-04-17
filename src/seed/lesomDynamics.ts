@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import type {
   AuditEntry,
   Chama,
@@ -16,8 +17,10 @@ import type {
   Share,
 } from '../types';
 
-const GROUP_ID = 'lesom-dynamics';
+export const GROUP_ID = 'lesom-dynamics';
 export const GROUP_NAME = 'LESOM Dynamics';
+
+const WESTLANDS_ID = 'ch2';
 
 const members: Member[] = [
   { id: 'm1', name: 'Kevin Isom', email: 'kevinisom9000@gmail.com', role: 'ChamaAdmin', joinedDate: '2023-06-01', phone: '+254758750620' },
@@ -116,7 +119,7 @@ const shares: Share[] = members.slice(0, 8).map((m, i) => ({
 
 const chamas: Chama[] = [
   { id: GROUP_ID, name: GROUP_NAME, memberCount: 12, totalCapital: 0, lastActivity: '1 hour ago', role: 'Admin', status: 'Active' },
-  { id: 'ch2', name: 'Westlands Real Estate Club', memberCount: 8, totalCapital: 5800000, lastActivity: '1 day ago', role: 'Member', status: 'Active' },
+  { id: WESTLANDS_ID, name: 'Westlands Real Estate Club', memberCount: 8, totalCapital: 5800000, lastActivity: '1 day ago', role: 'Member', status: 'Active' },
 ];
 
 function seedCases(): ChamaCase[] {
@@ -307,6 +310,7 @@ export function createLesomSeedState(): ChamaAppState {
         'Monthly contributions due by 5th. Late payment attracts fines per Fine Rules. Loans capped at 3x member contributions.',
       loanPolicySnippet: 'Active loans accrue 10% flat interest for 6-month term. Guarantor required above Ksh 40,000.',
       contributionPolicySnippet: 'Each member Ksh 5,000 monthly. Treasurer reconciles M-Pesa within 48 hours.',
+      chamaKind: 'SACCO',
     },
     fineRules: {
       amountPerDayLate: 200,
@@ -349,5 +353,84 @@ export function createLesomSeedState(): ChamaAppState {
     ],
     integrations: { nobukConnected: false, payheroConnected: false },
     monthlyTrend: trend.length ? trend : [{ month: '11', contributions: 55000, expenses: 4000 }],
+  };
+}
+
+/**
+ * Demo workspace switch: full LESOM seed for primary group; slimmer ledgers for other saved chamas.
+ * Keeps `chamas` list from `current` when it already includes user-added rows.
+ */
+export function buildStateForActiveChama(current: ChamaAppState, chamaId: string): ChamaAppState {
+  const lesom = createLesomSeedState();
+  const mergedChamas = current.chamas.length >= lesom.chamas.length ? current.chamas : lesom.chamas;
+
+  if (chamaId === GROUP_ID) {
+    return { ...lesom, chamas: mergedChamas };
+  }
+
+  const meta = mergedChamas.find((c) => c.id === chamaId);
+  const label = meta?.name ?? 'Chama';
+
+  if (chamaId === WESTLANDS_ID) {
+    return {
+      ...lesom,
+      groupId: WESTLANDS_ID,
+      groupName: label,
+      chamas: mergedChamas,
+      schedule: {
+        ...lesom.schedule,
+        monthlyContributionAmount: 10000,
+        meetingDay: 'Wednesday',
+      },
+      contributions: lesom.contributions.slice(0, 48),
+      cases: [],
+      fines: lesom.fines.slice(0, 1),
+      goals: lesom.goals.slice(0, 1),
+      auditLog: [
+        {
+          id: `aud-${uuidv4()}`,
+          at: new Date().toISOString(),
+          actorId: 'm1',
+          actorName: 'Kevin Isom',
+          action: 'workspace.opened',
+          entityType: 'group',
+          entityId: WESTLANDS_ID,
+          snapshot: JSON.stringify({ groupName: label }),
+        },
+        ...lesom.auditLog,
+      ],
+    };
+  }
+
+  return {
+    ...lesom,
+    groupId: chamaId,
+    groupName: label,
+    chamas: mergedChamas,
+    members: lesom.members.slice(0, 4),
+    contributions: [],
+    loans: [],
+    expenses: [],
+    income: [],
+    fines: [],
+    cases: [],
+    goals: [],
+    shares: lesom.shares.slice(0, 4).map((s, i) => ({ ...s, sharesOwned: i === 0 ? 120 : 40, totalValue: (i === 0 ? 120 : 40) * 1000 })),
+    mpesaTransactions: [],
+    notifications: [],
+    smsOutbox: [],
+    auditLog: [
+      {
+        id: `aud-${uuidv4()}`,
+        at: new Date().toISOString(),
+        actorId: 'm1',
+        actorName: 'Kevin Isom',
+        action: 'workspace.opened',
+        entityType: 'group',
+        entityId: chamaId,
+        snapshot: JSON.stringify({ groupName: label }),
+      },
+    ],
+    monthlyTrend: [{ month: '—', contributions: 0, expenses: 0 }],
   };
 }

@@ -1,16 +1,22 @@
 import { v4 as uuidv4 } from 'uuid';
-import { createLesomSeedState } from '../seed/lesomDynamics';
+import { buildStateForActiveChama, createLesomSeedState } from '../seed/lesomDynamics';
 import type {
   CaseEvent,
   CaseStatus,
+  Chama,
   ChamaAppState,
   ChamaCase,
   Contribution,
+  Expense,
+  Fine,
   FineRule,
+  Goal,
   GroupRules,
   GroupSchedule,
   IntegrationToggles,
   Loan,
+  Member,
+  MemberRole,
   NotificationItem,
 } from '../types';
 import {
@@ -61,7 +67,13 @@ export type ChamaAction =
   | { type: 'SET_FINE_RULES'; rules: FineRule }
   | { type: 'SET_SCHEDULE'; schedule: GroupSchedule }
   | { type: 'SET_GROUP_RULES'; rules: GroupRules }
-  | { type: 'SET_INTEGRATIONS'; integrations: IntegrationToggles };
+  | { type: 'SET_INTEGRATIONS'; integrations: IntegrationToggles }
+  | { type: 'SWITCH_GROUP'; chamaId: string }
+  | { type: 'ADD_DEMO_CHAMA'; name: string }
+  | { type: 'ADD_MEMBER'; member: { name: string; email: string; role: MemberRole; phone?: string } }
+  | { type: 'ADD_FINE'; memberId: string; amount: number; reason: string }
+  | { type: 'ADD_EXPENSE'; expense: Omit<Expense, 'id'> }
+  | { type: 'ADD_GOAL'; goal: Omit<Goal, 'id'> };
 
 export function chamaReducer(state: ChamaAppState, action: ChamaAction): ChamaAppState {
   switch (action.type) {
@@ -406,6 +418,80 @@ export function chamaReducer(state: ChamaAppState, action: ChamaAction): ChamaAp
     case 'SET_INTEGRATIONS': {
       return { ...state, integrations: action.integrations };
     }
+    case 'SWITCH_GROUP': {
+      return buildStateForActiveChama(state, action.chamaId);
+    }
+    case 'ADD_DEMO_CHAMA': {
+      const id = `ch-${uuidv4().slice(0, 8)}`;
+      const name = action.name.trim() || 'New Chama';
+      const newChama: Chama = {
+        id,
+        name,
+        memberCount: 1,
+        totalCapital: 0,
+        lastActivity: 'Just now',
+        role: 'Admin',
+        status: 'Active',
+      };
+      let next = { ...state, chamas: [...state.chamas, newChama] };
+      next = pushAudit(next, 'chama.created', 'chama', id, newChama);
+      return next;
+    }
+    case 'ADD_MEMBER': {
+      const id = `m-${uuidv4().slice(0, 8)}`;
+      const m: Member = {
+        id,
+        name: action.member.name.trim() || 'Member',
+        email: action.member.email.trim() || 'member@example.com',
+        role: action.member.role,
+        joinedDate: new Date().toISOString().slice(0, 10),
+        phone: action.member.phone,
+      };
+      let next = { ...state, members: [...state.members, m] };
+      next = {
+        ...next,
+        chamas: next.chamas.map((c) =>
+          c.id === state.groupId ? { ...c, memberCount: next.members.length } : c,
+        ),
+      };
+      next = pushAudit(next, 'member.added', 'member', id, m);
+      return next;
+    }
+    case 'ADD_FINE': {
+      const member = state.members.find((x) => x.id === action.memberId);
+      if (!member) return state;
+      const f: Fine = {
+        id: `fine-${uuidv4()}`,
+        memberId: member.id,
+        memberName: member.name,
+        amount: action.amount,
+        reason: action.reason.trim() || 'Manual fine',
+        date: new Date().toISOString().slice(0, 10),
+        status: 'Pending',
+      };
+      let next = { ...state, fines: [...state.fines, f] };
+      next = pushAudit(next, 'fine.added', 'fine', f.id, f);
+      return next;
+    }
+    case 'ADD_EXPENSE': {
+      const ex: Expense = {
+        ...action.expense,
+        id: `exp-${uuidv4()}`,
+        date: action.expense.date || new Date().toISOString().slice(0, 10),
+      };
+      let next = { ...state, expenses: [...state.expenses, ex] };
+      next = pushAudit(next, 'expense.recorded', 'expense', ex.id, ex);
+      return next;
+    }
+    case 'ADD_GOAL': {
+      const g: Goal = {
+        ...action.goal,
+        id: `goal-${uuidv4()}`,
+      };
+      let next = { ...state, goals: [...state.goals, g] };
+      next = pushAudit(next, 'goal.added', 'goal', g.id, g);
+      return next;
+    }
     default:
       return state;
   }
@@ -416,7 +502,14 @@ export function getInitialPersistedState(): ChamaAppState {
     const demo = localStorage.getItem('chama-connect-demo') !== 'false';
     if (demo) return createLesomSeedState();
     const raw = localStorage.getItem('chama-connect-state');
-    if (raw) return JSON.parse(raw) as ChamaAppState;
+    if (raw) {
+      const parsed = JSON.parse(raw) as ChamaAppState;
+      const base = createLesomSeedState();
+      return {
+        ...parsed,
+        groupRules: { ...base.groupRules, ...parsed.groupRules },
+      };
+    }
   } catch {
     /* ignore */
   }

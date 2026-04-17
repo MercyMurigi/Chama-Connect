@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Users,
   Wallet,
@@ -42,7 +42,17 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import type { Chama, ChamaKind, Member, MemberRole } from './types';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -50,9 +60,53 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isChamasExpanded, setIsChamasExpanded] = useState(true);
   const [notifOpen, setNotifOpen] = useState(false);
+  const [headerSearch, setHeaderSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(false);
+  const [darkOn, setDarkOn] = useState(() => {
+    try {
+      return localStorage.getItem('chama-connect-theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
+  const notifWrapRef = useRef<HTMLDivElement>(null);
+  const searchWrapRef = useRef<HTMLDivElement>(null);
   const { state, demoMode, setDemoMode, dispatch } = useChama();
 
   const selectedChama = state.groupName;
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkOn) root.classList.add('dark');
+    else root.classList.remove('dark');
+    try {
+      localStorage.setItem('chama-connect-theme', darkOn ? 'dark' : 'light');
+    } catch {
+      /* ignore */
+    }
+  }, [darkOn]);
+
+  useEffect(() => {
+    if (!notifOpen && !searchOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (notifOpen && notifWrapRef.current && !notifWrapRef.current.contains(t)) setNotifOpen(false);
+      if (searchOpen && searchWrapRef.current && !searchWrapRef.current.contains(t)) setSearchOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [notifOpen, searchOpen]);
+
+  const searchHits = useMemo(() => {
+    const q = headerSearch.trim().toLowerCase();
+    if (!q) return { members: [] as Member[], chamas: [] as Chama[] };
+    const members = state.members
+      .filter((m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q))
+      .slice(0, 8);
+    const chamas = state.chamas.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 6);
+    return { members, chamas };
+  }, [headerSearch, state.members, state.chamas]);
 
   const renderContent = () => {
     switch (activePage) {
@@ -61,19 +115,19 @@ export default function App() {
       case 'my-chamas':
         return <MyChamasView onOpenChama={() => setActivePage('dashboard')} />;
       case 'members':
-        return <MembersView groupName={selectedChama} />;
+        return <MembersView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'contributions':
-        return <ContributionsView groupName={selectedChama} />;
+        return <ContributionsView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'finances':
-        return <FinancesView groupName={selectedChama} />;
+        return <FinancesView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'shares':
-        return <SharesView groupName={selectedChama} />;
+        return <SharesView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'settings':
-        return <SettingsView groupName={selectedChama} />;
+        return <SettingsView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'goals':
-        return <GoalsView groupName={selectedChama} />;
+        return <GoalsView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'fines':
-        return <FinesView groupName={selectedChama} />;
+        return <FinesView groupName={selectedChama} onBack={() => setActivePage('my-chamas')} />;
       case 'cases':
         return <CasesView groupName={selectedChama} onBack={() => setActivePage('dashboard')} />;
       case 'mpesa':
@@ -89,10 +143,10 @@ export default function App() {
 
   return (
     <ChamaCopilotProvider>
-    <div className="flex h-screen bg-white font-sans text-neutral-900 border-t border-neutral-100">
+    <div className="flex h-screen bg-white font-sans text-neutral-900 border-t border-neutral-100 dark:bg-neutral-950 dark:text-neutral-100 dark:border-neutral-800">
       {/* Sidebar */}
       <aside className={cn(
-        "h-screen border-r border-neutral-100 bg-white transition-all duration-300 flex flex-col pt-4 shrink-0 overflow-y-auto no-scrollbar",
+        "h-screen border-r border-neutral-100 bg-white transition-all duration-300 flex flex-col pt-4 shrink-0 overflow-y-auto no-scrollbar dark:bg-neutral-950 dark:border-neutral-800",
         isSidebarOpen ? "w-64" : "w-20"
       )}>
         <div className="px-6 flex items-center justify-between mb-8 group cursor-pointer">
@@ -166,22 +220,72 @@ export default function App() {
       </aside>
 
       {/* Main Content Area — min-h-0 keeps flex height so footer stays at viewport bottom */}
-      <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#F9FAFB]">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 bg-[#F9FAFB] dark:bg-neutral-900">
         {/* Top Header */}
-        <header className="h-16 shrink-0 bg-white border-b border-neutral-100 px-6 flex items-center justify-between sticky top-0 z-30">
-          <div className="flex-1 max-w-xl">
+        <header className="h-16 shrink-0 bg-white border-b border-neutral-100 px-6 flex items-center justify-between sticky top-0 z-30 dark:bg-neutral-950 dark:border-neutral-800">
+          <div className="flex-1 max-w-xl" ref={searchWrapRef}>
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-              <input 
-                type="text" 
-                placeholder="Search users or messages" 
-                className="w-full pl-10 pr-4 py-1.5 bg-white border border-emerald-500/30 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:outline-none text-sm transition-all"
+              <input
+                type="text"
+                value={headerSearch}
+                onChange={(e) => {
+                  setHeaderSearch(e.target.value);
+                  setSearchOpen(true);
+                }}
+                onFocus={() => setSearchOpen(true)}
+                placeholder="Search members or chamas"
+                className="w-full pl-10 pr-4 py-1.5 bg-white border border-emerald-500/30 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:outline-none text-sm transition-all dark:bg-neutral-900 dark:border-emerald-700/40 dark:text-neutral-100"
               />
+              {searchOpen && (searchHits.members.length > 0 || searchHits.chamas.length > 0) && (
+                <div className="absolute left-0 right-0 top-full mt-1 rounded-xl border border-neutral-100 bg-white shadow-xl z-50 overflow-hidden dark:bg-neutral-950 dark:border-neutral-800">
+                  {searchHits.chamas.length > 0 && (
+                    <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-400 border-b border-neutral-50 dark:border-neutral-800">
+                      Chamas
+                    </div>
+                  )}
+                  {searchHits.chamas.map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm font-semibold text-neutral-900 hover:bg-emerald-50 dark:text-neutral-100 dark:hover:bg-emerald-950/40"
+                      onClick={() => {
+                        dispatch({ type: 'SWITCH_GROUP', chamaId: c.id });
+                        setActivePage('dashboard');
+                        setHeaderSearch('');
+                        setSearchOpen(false);
+                      }}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                  {searchHits.members.length > 0 && (
+                    <div className="px-2 py-1.5 text-[10px] font-black uppercase tracking-widest text-neutral-400 border-b border-neutral-50 dark:border-neutral-800">
+                      Members
+                    </div>
+                  )}
+                  {searchHits.members.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-900"
+                      onClick={() => {
+                        setActivePage('members');
+                        setHeaderSearch('');
+                        setSearchOpen(false);
+                      }}
+                    >
+                      <span className="font-bold text-neutral-900 dark:text-neutral-100">{m.name}</span>
+                      <span className="block text-xs text-neutral-500">{m.email}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-xs font-bold text-neutral-600 cursor-pointer select-none whitespace-nowrap">
+            <label className="flex items-center gap-2 text-xs font-bold text-neutral-600 cursor-pointer select-none whitespace-nowrap dark:text-neutral-400">
               <input
                 type="checkbox"
                 className="rounded border-neutral-300 text-emerald-600 focus:ring-emerald-500"
@@ -190,11 +294,16 @@ export default function App() {
               />
               Demo mode
             </label>
-            <div className="flex items-center gap-2 text-neutral-600">
-              <button type="button" className="p-1 hover:text-emerald-500 transition-colors">
+            <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400">
+              <button
+                type="button"
+                title={darkOn ? 'Light mode' : 'Dark mode'}
+                className="p-1 hover:text-emerald-500 transition-colors"
+                onClick={() => setDarkOn((d) => !d)}
+              >
                 <Moon className="w-5 h-5" />
               </button>
-              <div className="relative">
+              <div className="relative" ref={notifWrapRef}>
                 <button
                   type="button"
                   className="p-1 hover:text-emerald-500 transition-colors relative"
@@ -208,17 +317,17 @@ export default function App() {
                 >
                   <Bell className="w-5 h-5" />
                   {state.notifications.some((n) => !n.read) ? (
-                    <span className="absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white" />
+                    <span className="absolute top-0 right-0 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-neutral-950" />
                   ) : null}
                 </button>
                 {notifOpen && (
-                  <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-neutral-100 bg-white shadow-xl z-50 p-2 text-left">
+                  <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border border-neutral-100 bg-white shadow-xl z-50 p-2 text-left dark:bg-neutral-950 dark:border-neutral-800">
                     {state.notifications.length === 0 ? (
                       <p className="text-xs text-neutral-400 p-3">No notifications</p>
                     ) : (
                       state.notifications.slice(0, 12).map((n) => (
-                        <div key={n.id} className="rounded-lg px-3 py-2 hover:bg-neutral-50 text-sm border-b border-neutral-50 last:border-0">
-                          <p className="font-bold text-neutral-900">{n.title}</p>
+                        <div key={n.id} className="rounded-lg px-3 py-2 hover:bg-neutral-50 text-sm border-b border-neutral-50 last:border-0 dark:hover:bg-neutral-900">
+                          <p className="font-bold text-neutral-900 dark:text-neutral-100">{n.title}</p>
                           <p className="text-neutral-500 text-xs mt-0.5">{n.body}</p>
                         </div>
                       ))
@@ -226,7 +335,12 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <button type="button" className="p-1 hover:text-emerald-500 transition-colors">
+              <button
+                type="button"
+                title="Messages"
+                className="p-1 hover:text-emerald-500 transition-colors"
+                onClick={() => setMessagesOpen(true)}
+              >
                 <MessageSquare className="w-5 h-5" />
               </button>
             </div>
@@ -261,11 +375,36 @@ export default function App() {
               </AnimatePresence>
             </div>
           </div>
-          <footer className="shrink-0 h-12 border-t border-neutral-100 bg-white flex items-center justify-center text-[13px] text-neutral-500">
+          <footer className="shrink-0 h-12 border-t border-neutral-100 bg-white flex items-center justify-center text-[13px] text-neutral-500 dark:bg-neutral-950 dark:border-neutral-800 dark:text-neutral-400">
             © 2026 ChamaConnect 2.0 — Admin
           </footer>
         </main>
       </div>
+
+      <Dialog open={messagesOpen} onOpenChange={setMessagesOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Messages</DialogTitle>
+            <DialogDescription>
+              In-app threads are not wired yet. SMS outbox for this demo is visible from the M-Pesa simulator screen.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setMessagesOpen(false)}>
+              Close
+            </Button>
+            <Button
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                setMessagesOpen(false);
+                setActivePage('mpesa');
+              }}
+            >
+              Open M-Pesa sim
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
     </ChamaCopilotProvider>
   );
@@ -273,9 +412,36 @@ export default function App() {
 
 function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [landingDark, setLandingDark] = useState(() => {
+    try {
+      return localStorage.getItem('chama-connect-theme') === 'dark';
+    } catch {
+      return false;
+    }
+  });
+  const [newsEmail, setNewsEmail] = useState('');
+  const [newsDone, setNewsDone] = useState(false);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (landingDark) root.classList.add('dark');
+    else root.classList.remove('dark');
+    try {
+      localStorage.setItem('chama-connect-theme', landingDark ? 'dark' : 'light');
+    } catch {
+      /* ignore */
+    }
+  }, [landingDark]);
+
+  const navItems = [
+    { label: 'Home' as const, href: '#home' },
+    { label: 'Features' as const, href: '#features' },
+    { label: 'Pricing' as const, href: '#pricing' },
+    { label: 'Company' as const, href: '#company' },
+  ];
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen bg-white text-neutral-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 dark:bg-neutral-950 dark:text-neutral-100">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -293,18 +459,29 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {['Home', 'Features', 'Pricing', 'Company'].map((item) => (
-              <a key={item} href="#" className={cn(
-                "text-sm font-semibold transition-colors",
-                item === 'Home' ? "text-emerald-600 underline underline-offset-4 decoration-2" : "text-neutral-600 hover:text-emerald-600"
-              )}>
-                {item} {item === 'Company' && <ChevronDown className="inline w-3 h-3 ml-1" />}
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  'text-sm font-semibold transition-colors',
+                  item.label === 'Home'
+                    ? 'text-emerald-600 underline underline-offset-4 decoration-2'
+                    : 'text-neutral-600 hover:text-emerald-600 dark:text-neutral-400 dark:hover:text-emerald-400',
+                )}
+              >
+                {item.label} {item.label === 'Company' && <ChevronDown className="inline w-3 h-3 ml-1" />}
               </a>
             ))}
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <button className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors">
+            <button
+              type="button"
+              title={landingDark ? 'Light mode' : 'Dark mode'}
+              className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors dark:text-neutral-500 dark:hover:text-neutral-300"
+              onClick={() => setLandingDark((d) => !d)}
+            >
               <Moon className="w-5 h-5" />
             </button>
             <Button className="bg-[#10b981] hover:bg-[#059669] text-white px-6 h-10 rounded-lg font-bold text-sm shadow-sm transition-all" onClick={onGetStarted}>
@@ -328,8 +505,10 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
               className="md:hidden bg-white border-b border-neutral-100 overflow-hidden"
             >
               <div className="px-6 py-8 flex flex-col gap-6">
-                {['Home', 'Features', 'Pricing', 'Company'].map((item) => (
-                  <a key={item} href="#" className="text-lg font-bold text-neutral-900">{item}</a>
+                {navItems.map((item) => (
+                  <a key={item.label} href={item.href} className="text-lg font-bold text-neutral-900 dark:text-neutral-100">
+                    {item.label}
+                  </a>
                 ))}
                 <hr className="border-neutral-100" />
                 <Button className="bg-emerald-600 w-full h-14 rounded-2xl font-bold" onClick={onGetStarted}>Get Started Free</Button>
@@ -340,7 +519,7 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-48 pb-24 px-6 relative">
+      <section id="home" className="pt-48 pb-24 px-6 relative scroll-mt-24">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -474,7 +653,7 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       </section>
 
       {/* Features Grid (Light) */}
-      <section className="py-24 px-6 bg-[#F9FAFB]/50">
+      <section id="features" className="py-24 px-6 bg-[#F9FAFB]/50 scroll-mt-24 dark:bg-neutral-900/50">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           <ProcessCard 
             icon={<Users className="w-6 h-6" />}
@@ -500,7 +679,7 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       </section>
 
       {/* Dark Who We Are Section */}
-      <section className="py-32 px-6 bg-[#111827] text-white overflow-hidden relative">
+      <section id="company" className="py-32 px-6 bg-[#111827] text-white overflow-hidden relative scroll-mt-24">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
@@ -540,7 +719,7 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
       </section>
 
       {/* Trusted Platform Grid */}
-      <section className="py-32 px-6">
+      <section id="pricing" className="py-32 px-6 scroll-mt-24 dark:bg-neutral-950">
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-4xl mx-auto mb-20 space-y-6">
             <h2 className="text-6xl font-black text-neutral-900 tracking-tighter">The Most Trusted Chama Platform</h2>
@@ -588,7 +767,14 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
 
           <div className="mt-16 flex justify-center gap-6">
             <Button className="bg-[#10b981] hover:bg-[#059669] text-white px-10 h-14 rounded-lg font-black text-sm" onClick={onGetStarted}>Start Free Trial</Button>
-            <Button variant="outline" className="text-neutral-900 border-neutral-200 px-10 h-14 rounded-lg font-black text-sm hover:bg-neutral-50">View Features</Button>
+            <Button
+              variant="outline"
+              type="button"
+              className="text-neutral-900 border-neutral-200 px-10 h-14 rounded-lg font-black text-sm hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-900"
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              View Features
+            </Button>
           </div>
         </div>
       </section>
@@ -610,14 +796,27 @@ function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
            </div>
            
            <div className="max-w-md mx-auto relative">
-             <input 
-               type="email" 
-               placeholder="Enter your email" 
-               className="w-full pl-6 pr-12 py-4 bg-white border border-neutral-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:outline-none font-medium shadow-sm"
+             <input
+               type="email"
+               value={newsEmail}
+               onChange={(e) => setNewsEmail(e.target.value)}
+               placeholder="Enter your email"
+               className="w-full pl-6 pr-12 py-4 bg-white border border-neutral-100 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:outline-none font-medium shadow-sm dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
              />
-             <button className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-emerald-600 text-white rounded-lg flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-sm">
+             <button
+               type="button"
+               className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-emerald-600 text-white rounded-lg flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-sm"
+               onClick={() => {
+                 if (!newsEmail.trim()) return;
+                 setNewsDone(true);
+                 setNewsEmail('');
+               }}
+             >
                 <ArrowRight className="w-5 h-5" />
              </button>
+             {newsDone ? (
+               <p className="mt-3 text-sm font-semibold text-emerald-700 dark:text-emerald-400">Thanks — you&apos;re on the list (demo).</p>
+             ) : null}
            </div>
         </div>
 
@@ -777,19 +976,65 @@ function SidebarItem({ icon: Icon, label, isActive, isOpen, onClick }: { icon: a
 }
 
 function MyChamasView({ onOpenChama }: { onOpenChama: () => void }) {
-  const { state } = useChama();
+  const { state, dispatch } = useChama();
+  const [chamaSearch, setChamaSearch] = useState('');
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newChamaName, setNewChamaName] = useState('');
   const totalContrib = state.contributions.filter((c) => c.status === 'Paid').reduce((s, c) => s + c.amount, 0);
   const activeLoans = state.loans.filter((l) => l.status === 'Active' || l.status === 'Overdue').reduce((s, l) => s + l.amount, 0);
   const activeCount = state.chamas.filter((c) => c.status === 'Active').length;
+  const filteredChamas = useMemo(() => {
+    const q = chamaSearch.trim().toLowerCase();
+    if (!q) return state.chamas;
+    return state.chamas.filter((c) => c.name.toLowerCase().includes(q));
+  }, [chamaSearch, state.chamas]);
 
   return (
     <div className="space-y-10">
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Create chama</DialogTitle>
+            <DialogDescription>Adds a new group to your list. Open it to load a fresh demo ledger for that workspace.</DialogDescription>
+          </DialogHeader>
+          <div>
+            <Label className="text-xs font-bold uppercase text-neutral-500">Group name</Label>
+            <input
+              className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              value={newChamaName}
+              onChange={(e) => setNewChamaName(e.target.value)}
+              placeholder="e.g. Riverside Welfare"
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                dispatch({ type: 'ADD_DEMO_CHAMA', name: newChamaName.trim() || 'New Chama' });
+                setNewChamaName('');
+                setCreateOpen(false);
+              }}
+            >
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
           <h1 className="text-[32px] font-bold text-[#111827] tracking-tight">My Chamas</h1>
           <p className="text-neutral-500 text-sm">Manage and track your chama groups</p>
         </div>
-        <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg px-6 h-11 font-semibold flex items-center gap-2 transition-colors">
+        <Button
+          type="button"
+          className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg px-6 h-11 font-semibold flex items-center gap-2 transition-colors"
+          onClick={() => setCreateOpen(true)}
+        >
           <Plus className="w-5 h-5" />
           Create Chama
         </Button>
@@ -811,17 +1056,22 @@ function MyChamasView({ onOpenChama }: { onOpenChama: () => void }) {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input
                   type="text"
+                  value={chamaSearch}
+                  onChange={(e) => setChamaSearch(e.target.value)}
                   placeholder="Search Chamas..."
-                  className="w-full pl-10 pr-4 py-1.5 bg-white border border-neutral-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs transition-all"
+                  className="w-full pl-10 pr-4 py-1.5 bg-white border border-neutral-100 rounded-lg focus:ring-1 focus:ring-emerald-500 focus:outline-none text-xs transition-all dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
                 />
               </div>
             </div>
             <div className="space-y-3">
-              {state.chamas.map((c) => (
+              {filteredChamas.map((c) => (
                 <button
                   key={c.id}
                   type="button"
-                  onClick={onOpenChama}
+                  onClick={() => {
+                    dispatch({ type: 'SWITCH_GROUP', chamaId: c.id });
+                    onOpenChama();
+                  }}
                   className="w-full flex items-center justify-between rounded-xl border border-neutral-100 px-4 py-4 text-left hover:border-emerald-200 hover:bg-emerald-50/30 transition-all"
                 >
                   <div>
@@ -891,19 +1141,26 @@ function StatusRow({ label, value }: { label: string, value: string }) {
   );
 }
 
-function SkeletonRow({ width = "w-full" }: { width?: string }) {
-  return (
-    <div className="space-y-2">
-      <div className={cn("h-2 bg-neutral-100 rounded-full", width)} />
-      <div className="h-1.5 bg-neutral-100/50 rounded-full w-1/3" />
-    </div>
-  );
-}
-
-function PageHeader({ title, subtitle, breadcrumb, actions }: { title: string, subtitle?: string, breadcrumb: string, actions?: React.ReactNode }) {
+function PageHeader({
+  title,
+  subtitle,
+  breadcrumb,
+  actions,
+  onBack,
+}: {
+  title: string;
+  subtitle?: string;
+  breadcrumb: string;
+  actions?: React.ReactNode;
+  onBack?: () => void;
+}) {
   return (
     <div className="mb-8 space-y-4">
-      <button className="flex items-center gap-2 text-[#047857] hover:underline text-sm font-medium">
+      <button
+        type="button"
+        className="flex items-center gap-2 text-[#047857] hover:underline text-sm font-medium dark:text-emerald-400"
+        onClick={onBack}
+      >
         <ArrowLeft className="w-4 h-4" />
         {breadcrumb}
       </button>
@@ -918,29 +1175,136 @@ function PageHeader({ title, subtitle, breadcrumb, actions }: { title: string, s
   );
 }
 
-function MembersView({ groupName }: { groupName: string }) {
-  const { state } = useChama();
+function MembersView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
+  const { state, dispatch } = useChama();
+  const [importOpen, setImportOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newRole, setNewRole] = useState<MemberRole>('Member');
+  const [newPhone, setNewPhone] = useState('');
+
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
       <PageHeader
         title={groupName}
         subtitle="Members"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={
           <>
-            <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4">
+            <Button
+              variant="outline"
+              className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4"
+              type="button"
+              onClick={() => setImportOpen(true)}
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               Import
             </Button>
-            <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+              onClick={() => setAddOpen(true)}
+            >
               <Plus className="w-5 h-5" />
               Add Member
             </Button>
           </>
         }
       />
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Import members</DialogTitle>
+            <DialogDescription>
+              CSV import is not enabled in this demo. Export a template from your treasurer tools, then add members manually for now.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setImportOpen(false)}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Add member</DialogTitle>
+            <DialogDescription>Adds a member to this group (demo).</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Name</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Full name"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Email</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="email@example.com"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Phone (optional)</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="+254…"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Role</Label>
+              <select
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value as MemberRole)}
+              >
+                {(['Chairperson', 'Treasurer', 'Secretary', 'Member', 'ChamaAdmin'] as const).map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                dispatch({
+                  type: 'ADD_MEMBER',
+                  member: { name: newName, email: newEmail, role: newRole, phone: newPhone || undefined },
+                });
+                setNewName('');
+                setNewEmail('');
+                setNewPhone('');
+                setNewRole('Member');
+                setAddOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-white rounded-xl border border-neutral-100 shadow-sm overflow-hidden">
         <div className="px-6 py-5 border-b border-neutral-50">
@@ -995,32 +1359,119 @@ function MembersView({ groupName }: { groupName: string }) {
   );
 }
 
-function FinesView({ groupName }: { groupName: string }) {
+function FinesView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
   const [activeTab, setActiveTab] = useState('fines');
   const { state, dispatch } = useChama();
   const appeals = state.cases.filter((c) => c.category === 'fine_dispute');
+  const [importOpen, setImportOpen] = useState(false);
+  const [addFineOpen, setAddFineOpen] = useState(false);
+  const [fineMemberId, setFineMemberId] = useState(state.members[0]?.id ?? '');
+  const [fineAmount, setFineAmount] = useState('500');
+  const [fineReason, setFineReason] = useState('');
 
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
       <PageHeader
         title={groupName}
         subtitle="Fines & Appeals Management"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={
           <>
-            <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4"
+              onClick={() => setImportOpen(true)}
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
               Import
             </Button>
-            <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-semibold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+              onClick={() => setAddFineOpen(true)}
+            >
               <Plus className="w-5 h-5" />
               Add Fine
             </Button>
           </>
         }
       />
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Import fines</DialogTitle>
+            <DialogDescription>Bulk import is not enabled in this demo. Use Add Fine or run the penalty engine.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setImportOpen(false)}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={addFineOpen} onOpenChange={setAddFineOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Add fine</DialogTitle>
+            <DialogDescription>Creates a pending fine for the selected member.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Member</Label>
+              <select
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={fineMemberId}
+                onChange={(e) => setFineMemberId(e.target.value)}
+              >
+                {state.members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Amount (Ksh)</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={fineAmount}
+                onChange={(e) => setFineAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Reason</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={fineReason}
+                onChange={(e) => setFineReason(e.target.value)}
+                placeholder="e.g. Late contribution"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setAddFineOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                const amt = Number(String(fineAmount).replace(/,/g, '')) || 0;
+                dispatch({ type: 'ADD_FINE', memberId: fineMemberId, amount: amt, reason: fineReason });
+                setAddFineOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="flex items-center gap-8 mb-4 border-b border-neutral-100 h-12">
         <button
@@ -1131,8 +1582,10 @@ function FinesView({ groupName }: { groupName: string }) {
   );
 }
 
-function SharesView({ groupName }: { groupName: string }) {
+function SharesView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
   const { state } = useChama();
+  const [configOpen, setConfigOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
   const totalShares = state.shares.reduce((s, x) => s + x.sharesOwned, 0) || 1;
   const mine = state.shares.find((s) => s.memberId === 'm1');
   const issued = state.shares.reduce((s, x) => s + x.sharesOwned, 0);
@@ -1144,20 +1597,62 @@ function SharesView({ groupName }: { groupName: string }) {
       <PageHeader
         title="Share Capital Management"
         subtitle="Track and manage member shareholding"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={
           <>
-            <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4 font-bold text-sm">
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 text-neutral-700 h-11 border-neutral-200 shadow-sm px-4 font-bold text-sm"
+              onClick={() => setConfigOpen(true)}
+            >
               <Settings className="w-4 h-4" />
               Configure Shares
             </Button>
-            <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm flex items-center gap-2">
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm flex items-center gap-2"
+              onClick={() => setTransferOpen(true)}
+            >
               <RefreshCcw className="w-4 h-4 rotate-90" />
               Transfer Shares
             </Button>
           </>
         }
       />
+
+      <Dialog open={configOpen} onOpenChange={setConfigOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Configure shares</DialogTitle>
+            <DialogDescription>
+              Par value and share cap are fixed in this demo dataset. Full cap-table editing will ship with treasury integrations.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setConfigOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Transfer shares</DialogTitle>
+            <DialogDescription>
+              Share transfers are recorded by the treasurer off-platform in this build. Open an ICDMS case if you need a dispute trail.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setTransferOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatItem
@@ -1302,9 +1797,17 @@ function StatItem({ label, value, sub, icon, color, containerColor }: { label: s
 
 type FinancesTab = 'income' | 'loans' | 'expenses';
 
-function FinancesView({ groupName }: { groupName: string }) {
+function FinancesView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
   const [tab, setTab] = useState<FinancesTab>('income');
-  const { state } = useChama();
+  const { state, dispatch } = useChama();
+  const [importOpen, setImportOpen] = useState(false);
+  const [loanOpen, setLoanOpen] = useState(false);
+  const [expenseOpen, setExpenseOpen] = useState(false);
+  const [loanMemberId, setLoanMemberId] = useState(state.members[0]?.id ?? '');
+  const [loanAmount, setLoanAmount] = useState('25000');
+  const [expCategory, setExpCategory] = useState('Operations');
+  const [expAmount, setExpAmount] = useState('1500');
+  const [expDesc, setExpDesc] = useState('');
 
   const tabs = [
     {
@@ -1332,19 +1835,32 @@ function FinancesView({ groupName }: { groupName: string }) {
 
   const headerActions =
     tab === 'income' ? (
-      <Button variant="outline" className="gap-2 text-neutral-700 h-11 border-neutral-200 px-4 shadow-sm font-bold text-sm">
+      <Button
+        type="button"
+        variant="outline"
+        className="gap-2 text-neutral-700 h-11 border-neutral-200 px-4 shadow-sm font-bold text-sm"
+        onClick={() => setImportOpen(true)}
+      >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
         </svg>
         Import
       </Button>
     ) : tab === 'loans' ? (
-      <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+      <Button
+        type="button"
+        className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+        onClick={() => setLoanOpen(true)}
+      >
         <Plus className="w-5 h-5" />
         New Loan Application
       </Button>
     ) : (
-      <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+      <Button
+        type="button"
+        className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+        onClick={() => setExpenseOpen(true)}
+      >
         <Plus className="w-5 h-5" />
         Record Expense
       </Button>
@@ -1355,9 +1871,146 @@ function FinancesView({ groupName }: { groupName: string }) {
       <PageHeader
         title={groupName}
         subtitle="Finances — income, loans, and expenses in one workspace"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={headerActions}
       />
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Import income</DialogTitle>
+            <DialogDescription>
+              Bank and M-Pesa CSV import is not enabled in this demo. Record inflows manually from treasurer reports or use the M-Pesa simulator.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setImportOpen(false)}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={loanOpen} onOpenChange={setLoanOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">New loan application</DialogTitle>
+            <DialogDescription>Creates an active loan on the books (demo).</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-xs font-bold uppercase text-neutral-500">Member</Label>
+            <select
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              value={loanMemberId}
+              onChange={(e) => setLoanMemberId(e.target.value)}
+            >
+              {state.members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+            <Label className="text-xs font-bold uppercase text-neutral-500">Amount (Ksh)</Label>
+            <input
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              value={loanAmount}
+              onChange={(e) => setLoanAmount(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setLoanOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                const m = state.members.find((x) => x.id === loanMemberId);
+                if (!m) return;
+                const amt = Number(loanAmount.replace(/,/g, '')) || 0;
+                const due = new Date();
+                due.setMonth(due.getMonth() + 6);
+                dispatch({
+                  type: 'ADD_LOAN',
+                  loan: {
+                    memberId: m.id,
+                    memberName: m.name,
+                    amount: amt,
+                    interest: 10,
+                    issuedDate: new Date().toISOString().slice(0, 10),
+                    dueDate: due.toISOString().slice(0, 10),
+                    status: 'Active',
+                  },
+                });
+                setLoanOpen(false);
+              }}
+            >
+              Create loan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={expenseOpen} onOpenChange={setExpenseOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Record expense</DialogTitle>
+            <DialogDescription>Adds a row to the expense register.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Category</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={expCategory}
+                onChange={(e) => setExpCategory(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Amount (Ksh)</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={expAmount}
+                onChange={(e) => setExpAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Description</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={expDesc}
+                onChange={(e) => setExpDesc(e.target.value)}
+                placeholder="What was purchased?"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setExpenseOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                const amt = Number(String(expAmount).replace(/,/g, '')) || 0;
+                dispatch({
+                  type: 'ADD_EXPENSE',
+                  expense: {
+                    category: expCategory.trim() || 'General',
+                    amount: amt,
+                    description: expDesc.trim() || 'Expense',
+                    date: new Date().toISOString().slice(0, 10),
+                  },
+                });
+                setExpenseOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div
         className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -1531,14 +2184,16 @@ function FinancesView({ groupName }: { groupName: string }) {
   );
 }
 
-function SettingsView({ groupName }: { groupName: string }) {
+function SettingsView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
   const [activeTab, setActiveTab] = useState('Group Info');
   const { state, dispatch } = useChama();
+  const constitutionInputRef = useRef<HTMLInputElement>(null);
   const tabs = ['Group Info', 'Settings', 'Documents', 'Fine Rules', 'Welfare', 'Audit', 'Integrations'];
+  const chamaKind = state.groupRules.chamaKind ?? 'SACCO';
 
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)] overflow-x-hidden">
-      <PageHeader title="Settings" breadcrumb={`Back to ${groupName}`} />
+      <PageHeader title="Settings" breadcrumb="Back to My Chamas" onBack={onBack} />
 
       <div className="bg-white rounded-[2rem] border border-neutral-100 shadow-sm overflow-hidden p-8 max-w-4xl mx-auto md:mx-0">
         <div className="flex items-center gap-6 border-b border-neutral-100 mb-10 overflow-x-auto no-scrollbar scroll-smooth">
@@ -1713,10 +2368,19 @@ function SettingsView({ groupName }: { groupName: string }) {
               <div className="space-y-2.5">
                 <label className="text-[11px] font-black uppercase tracking-widest text-neutral-500 ml-1">Type</label>
                 <div className="relative">
-                  <select className="w-full px-5 py-4 bg-neutral-50 border border-neutral-100 rounded-xl font-bold text-neutral-900 outline-none appearance-none focus:ring-2 focus:ring-emerald-500/20 shadow-sm cursor-pointer">
-                    <option>SACCO</option>
-                    <option>Investment Group</option>
-                    <option>Welfare Club</option>
+                  <select
+                    className="w-full px-5 py-4 bg-neutral-50 border border-neutral-100 rounded-xl font-bold text-neutral-900 outline-none appearance-none focus:ring-2 focus:ring-emerald-500/20 shadow-sm cursor-pointer dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-100"
+                    value={chamaKind}
+                    onChange={(e) =>
+                      dispatch({
+                        type: 'SET_GROUP_RULES',
+                        rules: { ...state.groupRules, chamaKind: e.target.value as ChamaKind },
+                      })
+                    }
+                  >
+                    <option value="SACCO">SACCO</option>
+                    <option value="Investment Group">Investment Group</option>
+                    <option value="Welfare Club">Welfare Club</option>
                   </select>
                   <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                 </div>
@@ -1832,15 +2496,37 @@ function SettingsView({ groupName }: { groupName: string }) {
             {activeTab !== 'Welfare' && (
               <div className="space-y-6 pt-6 border-t border-neutral-50">
                 <h3 className="text-xl font-extrabold text-[#111827] tracking-tight">Group Constitution</h3>
-                <div className="border-2 border-dashed border-neutral-200 rounded-[1.5rem] p-12 flex flex-col items-center justify-center gap-5 hover:bg-neutral-50 hover:border-emerald-500/30 transition-all cursor-pointer group shadow-sm bg-neutral-50/10">
+                <input
+                  ref={constitutionInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,.txt"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    dispatch({
+                      type: 'SET_GROUP_RULES',
+                      rules: { ...state.groupRules, constitutionFileName: f.name },
+                    });
+                    e.target.value = '';
+                  }}
+                />
+                <button
+                  type="button"
+                  className="w-full border-2 border-dashed border-neutral-200 rounded-[1.5rem] p-12 flex flex-col items-center justify-center gap-5 hover:bg-neutral-50 hover:border-emerald-500/30 transition-all cursor-pointer group shadow-sm bg-neutral-50/10 text-left"
+                  onClick={() => constitutionInputRef.current?.click()}
+                >
                   <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 transition-all group-hover:scale-110 group-hover:rotate-12 shadow-sm ring-4 ring-white">
                     <Plus className="w-8 h-8" />
                   </div>
                   <div className="text-center space-y-1">
                     <p className="text-sm font-bold text-neutral-900 tracking-tight">Upload Group Constitution Document</p>
-                    <p className="text-xs text-neutral-400 font-medium">Drag & drop or click to browse</p>
+                    <p className="text-xs text-neutral-400 font-medium">Click to browse (stored as filename in demo)</p>
+                    {state.groupRules.constitutionFileName ? (
+                      <p className="text-xs font-semibold text-emerald-700">Selected: {state.groupRules.constitutionFileName}</p>
+                    ) : null}
                   </div>
-                </div>
+                </button>
               </div>
             )}
 
@@ -1857,21 +2543,112 @@ function SettingsView({ groupName }: { groupName: string }) {
   );
 }
 
-function GoalsView({ groupName }: { groupName: string }) {
-  const { state } = useChama();
+function GoalsView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
+  const { state, dispatch } = useChama();
+  const [addOpen, setAddOpen] = useState(false);
+  const [gTitle, setGTitle] = useState('');
+  const [gTarget, setGTarget] = useState('100000');
+  const [gCurrent, setGCurrent] = useState('0');
+  const [gDeadline, setGDeadline] = useState(() => new Date().toISOString().slice(0, 10));
+  const [gCategory, setGCategory] = useState('Savings');
+
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
       <PageHeader
         title={`${groupName} Goals`}
         subtitle="Manage your group financial targets"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={
-          <Button className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2">
+          <Button
+            type="button"
+            className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+            onClick={() => setAddOpen(true)}
+          >
             <Plus className="w-5 h-5" />
             Add Goal
           </Button>
         }
       />
+
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Add goal</DialogTitle>
+            <DialogDescription>Creates a savings target for the group.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Title</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={gTitle}
+                onChange={(e) => setGTitle(e.target.value)}
+                placeholder="Emergency fund"
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Target (Ksh)</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={gTarget}
+                onChange={(e) => setGTarget(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Current (Ksh)</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={gCurrent}
+                onChange={(e) => setGCurrent(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Deadline</Label>
+              <input
+                type="date"
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={gDeadline}
+                onChange={(e) => setGDeadline(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs font-bold uppercase text-neutral-500">Category</Label>
+              <input
+                className="mt-1 w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                value={gCategory}
+                onChange={(e) => setGCategory(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                const target = Number(String(gTarget).replace(/,/g, '')) || 0;
+                const current = Number(String(gCurrent).replace(/,/g, '')) || 0;
+                dispatch({
+                  type: 'ADD_GOAL',
+                  goal: {
+                    title: gTitle.trim() || 'New goal',
+                    targetAmount: target,
+                    currentAmount: Math.min(current, target),
+                    deadline: gDeadline,
+                    category: gCategory.trim() || 'General',
+                  },
+                });
+                setAddOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="bg-white rounded-[2.5rem] border border-neutral-100 shadow-sm min-h-[400px] flex flex-col p-8">
         {state.goals.length === 0 ? (
@@ -1904,24 +2681,67 @@ function GoalsView({ groupName }: { groupName: string }) {
   );
 }
 
-function ContributionsView({ groupName }: { groupName: string }) {
+function ContributionsView({ groupName, onBack }: { groupName: string; onBack: () => void }) {
   const { state, dispatch } = useChama();
+  const [open, setOpen] = useState(false);
+  const [memberId, setMemberId] = useState(state.members[0]?.id ?? '');
+
   return (
     <div className="animate-in fade-in duration-500 bg-[#F9FAFB] -m-8 p-8 min-h-[calc(100vh-64px)]">
       <PageHeader
         title={groupName}
         subtitle="Contributions"
-        breadcrumb={`Back to ${groupName}`}
+        breadcrumb="Back to My Chamas"
+        onBack={onBack}
         actions={
           <Button
+            type="button"
             className="bg-[#047857] hover:bg-[#065f46] text-white rounded-lg h-11 px-6 font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2"
-            onClick={() => dispatch({ type: 'RECORD_CONTRIBUTION', memberId: state.members[0]?.id ?? 'm1' })}
+            onClick={() => setOpen(true)}
           >
             <Plus className="w-5 h-5" />
             Add Contribution
           </Button>
         }
       />
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-md border-neutral-100 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+          <DialogHeader>
+            <DialogTitle className="text-neutral-900 dark:text-neutral-100">Record contribution</DialogTitle>
+            <DialogDescription>Creates a paid monthly contribution for the selected member.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-xs font-bold uppercase text-neutral-500">Member</Label>
+            <select
+              className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+              value={memberId}
+              onChange={(e) => setMemberId(e.target.value)}
+            >
+              {state.members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="bg-[#047857] hover:bg-[#065f46] text-white"
+              onClick={() => {
+                dispatch({ type: 'RECORD_CONTRIBUTION', memberId });
+                setOpen(false);
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <div className="bg-white rounded-xl border border-neutral-100 shadow-sm min-h-[400px] overflow-x-auto">
         {state.contributions.length === 0 ? (
           <div className="flex items-center justify-center text-neutral-400 italic p-12">No contributions recorded yet.</div>

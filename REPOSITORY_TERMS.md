@@ -14,7 +14,7 @@ The **ChamaConnect Hackathon: Source Code Submission Terms & Conditions** are re
 
 | Topic | Summary (see PDF) |
 |--------|---------------------|
-| Organizers | Muiaa Ltd (Muiaa Labs) with Salamander Community |
+| Organizers | Muiaa Ltd (Muiaa Labs) with Salamander Tech Hub / Salamander Community |
 | Scope | Improve ChamaConnect (`chamaconnect.io` / `chamaconnect.co.ke`): feature enhancement and ICDMS optimization |
 | IP / ownership | **Irrevocable assignment** of IP in submitted source code, documentation, and assets to **Muiaa Ltd** and the broader community, in consideration of competing for prizes (**§2.1**) |
 | Use of submission | Public benefit via public GitHub; Muiaa Ltd and community may **modify, distribute, and commercialize** globally (**§2.2**) |
@@ -33,7 +33,7 @@ The **ChamaConnect Hackathon: Source Code Submission Terms & Conditions** are re
 
 ## 1) Parties and geography
 
-- **Organizers / assignee (under Official Submission Terms):** **Muiaa Ltd** (Muiaa Labs) and **Salamander Community**, in connection with the Chama Connect Virtual Hackathon in **Kenya** / **East Africa**.
+- **Organizers / assignee (under Official Submission Terms):** **Muiaa Ltd** (Muiaa Labs) and **Salamander Tech Hub** / **Salamander Community**, in connection with the Chama Connect Virtual Hackathon in **Kenya** / **East Africa**.
 - **Participants / contributors:** individuals or teams submitting work under the hackathon rules.
 - **Designated Recipient Team (ChamaConnect Team):** as used in other repo docs, means **Muiaa Ltd** (Muiaa Labs) and/or **Salamander Community** and their authorized successors, consistent with the Official Submission Terms.
 

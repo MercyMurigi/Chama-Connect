@@ -15,7 +15,9 @@ This document captures the project-aligned hackathon brief for this repository.
 
 ## Hackathon Goal
 
-Build meaningful improvements for ChamaConnect, a platform for managing chama operations such as members, contributions, loans, finances, and related records.
+Build meaningful improvements for **ChamaConnect** — the live platform at **chamaconnect.io** / **chamaconnect.co.ke** — for managing chama operations such as members, contributions, loans, finances, and related records.
+
+> Do not run disruptive or harmful tests against production; follow **§5** of the [Official Submission Terms](docs/ChamaConnect-Hackathon-Source-Code-Submission-Terms-and-Conditions.pdf) (Computer Misuse and Cybercrimes Act, 2018).
 
 ## Core Focus Areas
 
@@ -43,10 +45,10 @@ Build meaningful improvements for ChamaConnect, a platform for managing chama op
 
 ## Timeline and Deadline
 
-- **Announcement poster deadline:** `17th April, 2026`
-- **Brief text variant in prior notes:** `Monday, 11:59 PM EAT`
+- **Announcement poster:** submission deadline **17 April 2026**
+- **Official Submission Terms (PDF §7):** submissions by **Monday, 11:59 PM EAT**; judges’ decision final; appeals within **24 hours** to Muiaa technical lead (see PDF for exact wording)
 
-If an official organizer channel provides a final authoritative cutoff, use that value for submission timing and keep this file updated.
+If the poster date and **§7** ever appear to conflict, **follow the PDF and the latest instruction from organizers** and update this file once confirmed.
 
 ## Prize Pool
 
@@ -84,5 +86,12 @@ To align this codebase with the hackathon objective, prioritize:
 ## Quick Reference
 
 - Main project documentation: `README.md`
+- Proposal / judge narrative: `HACKATHON_PROPOSAL.md`
+- Binding submission contract + PDF index: `docs/README.md`
+- Convenience summary of PDF topics (subordinate to PDF): `REPOSITORY_TERMS.md`
+- Contributor acceptance: `CONTRIBUTOR_SIGN_OFF.md`
 - Current code entry point: `src/App.tsx`
+- App routes / pages: `src/navigation.ts`
+- Domain state and actions: `src/domain/` (e.g. `chamaReducer.ts`, `chamaContext.tsx`)
+- Demo seed data: `src/seed/lesomDynamics.ts`
 - Data models: `src/types.ts`

@@ -197,10 +197,16 @@ export interface SmsOutboxEntry {
   status: 'simulated_sent' | 'queued';
 }
 
+export type ChamaKind = 'SACCO' | 'Investment Group' | 'Welfare Club';
+
 export interface GroupRules {
   constitutionSnippet: string;
   loanPolicySnippet: string;
   contributionPolicySnippet: string;
+  /** Group model shown in settings */
+  chamaKind: ChamaKind;
+  /** Last constitution file picked in-browser (name only; demo) */
+  constitutionFileName?: string;
 }
 
 export interface GroupSchedule {

@@ -5,6 +5,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "postinstall": "node scripts/fix-fast-json-patch.mjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "dev:api": "tsx server/src/index.ts",
     "build": "vite build",

@@ -24,7 +24,7 @@ You have read and agree to:
 
 ## 3) Hackathon submission rights
 
-You grant **Muiaa Ltd**, **Salamander Community**, hackathon judges, and platform
+You grant **Muiaa Ltd**, **Salamander Tech Hub** / **Salamander Community**, hackathon judges, and platform
 administrators the rights necessary to **receive, review, reproduce, modify, and
 distribute** your contribution for **hackathon administration, judging, and
 integration with ChamaConnect**, consistent with the Official Submission Terms.

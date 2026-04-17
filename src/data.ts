@@ -52,6 +52,37 @@ export const MOCK_SHARES: Share[] = [
   { memberId: '2', memberName: 'Jane Smith', sharesOwned: 110, totalValue: 110000 },
 ];
 
+export const TESTIMONIALS = [
+  {
+    id: 't1',
+    name: 'Sarah Kimani',
+    role: 'Treasurer, Upendo Women Chama',
+    content: 'ChamaConnect transformed our records. We used to spend hours manually balancing books. Now, everything is instant.',
+    avatar: 'https://picsum.photos/seed/sarah/100/100'
+  },
+  {
+    id: 't2',
+    name: 'David Otieno',
+    role: 'Chairman, Westlands Investment',
+    content: 'The loan tracking system is a lifesaver. No more disputes about interest or due dates. Highly professional.',
+    avatar: 'https://picsum.photos/seed/david/100/100'
+  },
+  {
+    id: 't3',
+    name: 'Grace Wambui',
+    role: 'Secretary, Green Valley Group',
+    content: 'The mobile responsiveness is amazing. Our members can check their balances and performance from anywhere.',
+    avatar: 'https://picsum.photos/seed/grace/100/100'
+  }
+];
+
+export const PARTNERS = [
+  { name: 'Equity Bank', logo: 'https://picsum.photos/seed/equity/200/80?grayscale' },
+  { name: 'Safaricom', logo: 'https://picsum.photos/seed/safaricom/200/80?grayscale' },
+  { name: 'KCB Bank', logo: 'https://picsum.photos/seed/kcb/200/80?grayscale' },
+  { name: 'Co-op Bank', logo: 'https://picsum.photos/seed/coop/200/80?grayscale' },
+];
+
 export const MONTHLY_SUMMARY = [
   { month: 'Oct', contributions: 25000, loans: 10000 },
   { month: 'Nov', contributions: 28000, loans: 5000 },

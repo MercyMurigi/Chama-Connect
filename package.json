@@ -1,13 +1,16 @@
 {
-  "name": "react-example",
+  "name": "chamaconnect-2.0",
   "private": true,
   "license": "UNLICENSED",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "postinstall": "node scripts/fix-fast-json-patch.mjs",
+    "predev:api": "node scripts/fix-fast-json-patch.mjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev:all": "concurrently -k \"npm run dev:api\" \"npm run dev\"",
     "dev:api": "tsx server/src/index.ts",
+    "dev:server": "npm run dev:api",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",

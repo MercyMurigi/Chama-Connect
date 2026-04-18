@@ -1,8 +1,34 @@
 import { useMemo } from 'react';
-import { CopilotKit, useCopilotAction, useCopilotReadable } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
-import '@copilotkit/react-ui/styles.css';
+import {
+  CopilotKit,
+  CopilotSidebar,
+  useAgentContext,
+  useConfigureSuggestions,
+  useFrontendTool,
+} from '@copilotkit/react-core/v2';
+import '@copilotkit/react-core/v2/styles.css';
+import { z } from 'zod';
 import { useChama } from '@/src/domain/chamaContext';
+
+const CHAT_SUGGESTIONS = [
+  {
+    title: 'Finance snapshot',
+    message:
+      'Summarize total paid contributions, income, and expenses for this chama in plain language (English or Kiswahili).',
+  },
+  {
+    title: 'Contribution help',
+    message: 'Which members still have pending monthly contributions, and what amounts are due?',
+  },
+  {
+    title: 'Run penalties',
+    message: 'Run the late-payment penalty evaluation and tell me what changed in the fines list.',
+  },
+  {
+    title: 'M-Pesa simulator',
+    message: 'How do I simulate an M-Pesa payment for amount 5000 and phone 254712000004?',
+  },
+] as const;
 
 function ChamaCopilotContext() {
   const { state, dispatch } = useChama();
@@ -25,55 +51,78 @@ function ChamaCopilotContext() {
     [state],
   );
 
-  useCopilotReadable(
+  useAgentContext({
+    description: 'Live chama data for grounded answers (English/Kiswahili)',
+    value: snapshot,
+  });
+
+  useConfigureSuggestions(
     {
-      description: 'Live chama data for grounded answers (English/Kiswahili)',
-      value: snapshot,
+      suggestions: [...CHAT_SUGGESTIONS],
+      available: 'before-first-message',
+      consumerAgentId: 'default',
     },
-    [snapshot],
+    [],
   );
 
-  useCopilotAction({
-    name: 'record_contribution',
-    description: 'Record a paid monthly contribution for a member by id (e.g. m1)',
-    parameters: [
-      { name: 'memberId', type: 'string', description: 'Member id from roster', required: true },
-    ],
-    handler: async ({ memberId }) => {
-      dispatch({ type: 'RECORD_CONTRIBUTION', memberId: String(memberId) });
-      return 'Contribution recorded.';
+  useFrontendTool(
+    {
+      name: 'record_contribution',
+      description: 'Record a paid monthly contribution for a member by id (e.g. m1)',
+      parameters: z.object({
+        memberId: z.string().describe('Member id from roster'),
+      }),
+      handler: async ({ memberId }) => {
+        dispatch({ type: 'RECORD_CONTRIBUTION', memberId: String(memberId) });
+        return 'Contribution recorded.';
+      },
     },
-  });
+    [dispatch],
+  );
 
-  useCopilotAction({
-    name: 'run_penalty_engine',
-    description: 'Run late-payment penalty evaluation for the group',
-    parameters: [],
-    handler: async () => {
-      dispatch({ type: 'RUN_PENALTIES' });
-      return 'Penalty engine executed.';
+  useFrontendTool(
+    {
+      name: 'run_penalty_engine',
+      description: 'Run late-payment penalty evaluation for the group',
+      parameters: z.object({}),
+      handler: async () => {
+        dispatch({ type: 'RUN_PENALTIES' });
+        return 'Penalty engine executed.';
+      },
     },
-  });
+    [dispatch],
+  );
 
-  useCopilotAction({
-    name: 'simulate_mpesa',
-    description: 'Simulate an M-Pesa webhook (amount + phone 254…)',
-    parameters: [
-      { name: 'amount', type: 'string', description: 'Amount in Ksh (numeric string)', required: true },
-      { name: 'phone', type: 'string', description: 'MSISDN e.g. 254712000004', required: true },
-    ],
-    handler: async ({ amount, phone }) => {
-      dispatch({ type: 'SIMULATE_MPESA', amount: Number(String(amount).replace(/,/g, '')), phone: String(phone) });
-      return 'M-Pesa simulation applied.';
+  useFrontendTool(
+    {
+      name: 'simulate_mpesa',
+      description: 'Simulate an M-Pesa webhook (amount + phone 254…)',
+      parameters: z.object({
+        amount: z.string().describe('Amount in Ksh (numeric string)'),
+        phone: z.string().describe('MSISDN e.g. 254712000004'),
+      }),
+      handler: async ({ amount, phone }) => {
+        dispatch({
+          type: 'SIMULATE_MPESA',
+          amount: Number(String(amount).replace(/,/g, '')),
+          phone: String(phone),
+        });
+        return 'M-Pesa simulation applied.';
+      },
     },
-  });
+    [dispatch],
+  );
 
   return (
     <CopilotSidebar
+      className="copilot-chama-connect"
+      agentId="default"
       defaultOpen={false}
       clickOutsideToClose
+      width={420}
       labels={{
-        title: 'Chama AI Advisor',
+        modalHeaderTitle: 'Chama AI Advisor',
+        chatInputPlaceholder: 'Ask about contributions, fines, loans, or M-Pesa…',
       }}
       instructions="Use only numbers from readable context. Support Kiswahili. For legal matters, remind users to verify with the group constitution."
     />
@@ -82,7 +131,7 @@ function ChamaCopilotContext() {
 
 export function ChamaCopilotProvider({ children }: { children: React.ReactNode }) {
   return (
-    <CopilotKit runtimeUrl="/api/copilotkit" agent="default" showDevConsole={false}>
+    <CopilotKit runtimeUrl="/api/copilotkit" showDevConsole={false}>
       <ChamaCopilotContext />
       {children}
     </CopilotKit>

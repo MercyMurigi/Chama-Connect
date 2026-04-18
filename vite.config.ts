@@ -26,5 +26,13 @@ export default defineConfig(({mode}) => {
         },
       },
     },
+    preview: {
+      proxy: {
+        '/api': {
+          target: `http://127.0.0.1:${env.PORT || '3001'}`,
+          changeOrigin: true,
+        },
+      },
+    },
   };
 });

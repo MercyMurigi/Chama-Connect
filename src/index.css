@@ -128,3 +128,21 @@
     @apply font-sans;
     }
 }
+
+/* ChamaConnect — CopilotKit v2 (data-copilotkit): emerald primary, readable chrome */
+[data-copilotkit].copilot-chama-connect {
+  --primary: oklch(0.45 0.12 166);
+  --primary-foreground: oklch(0.99 0.01 166);
+  --ring: oklch(0.55 0.14 166);
+  --sidebar-primary: oklch(0.45 0.12 166);
+  --sidebar-primary-foreground: oklch(0.99 0.01 166);
+}
+
+html.dark [data-copilotkit].copilot-chama-connect,
+.dark [data-copilotkit].copilot-chama-connect {
+  --primary: oklch(0.72 0.14 166);
+  --primary-foreground: oklch(0.18 0.03 166);
+  --ring: oklch(0.6 0.12 166);
+  --sidebar-primary: oklch(0.72 0.14 166);
+  --sidebar-primary-foreground: oklch(0.18 0.03 166);
+}

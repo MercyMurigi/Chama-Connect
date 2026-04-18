@@ -2188,6 +2188,7 @@ function SettingsView({ groupName, onBack }: { groupName: string; onBack: () => 
   const [activeTab, setActiveTab] = useState('Group Info');
   const { state, dispatch } = useChama();
   const constitutionInputRef = useRef<HTMLInputElement>(null);
+  const technicalProposalInputRef = useRef<HTMLInputElement>(null);
   const tabs = ['Group Info', 'Settings', 'Documents', 'Fine Rules', 'Welfare', 'Audit', 'Integrations'];
   const chamaKind = state.groupRules.chamaKind ?? 'SACCO';
 
@@ -2524,6 +2525,50 @@ function SettingsView({ groupName, onBack }: { groupName: string; onBack: () => 
                     <p className="text-xs text-neutral-400 font-medium">Click to browse (stored as filename in demo)</p>
                     {state.groupRules.constitutionFileName ? (
                       <p className="text-xs font-semibold text-emerald-700">Selected: {state.groupRules.constitutionFileName}</p>
+                    ) : null}
+                  </div>
+                </button>
+
+                <h3 className="text-xl font-extrabold text-[#111827] tracking-tight pt-2">Technical proposal (PDF)</h3>
+                <p className="text-xs text-neutral-500 font-medium -mt-4">
+                  For hackathon or partner submissions: attach your written proposal as a single PDF (features, impact, approach).
+                </p>
+                <input
+                  ref={technicalProposalInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    const ok =
+                      f.type === 'application/pdf' ||
+                      f.name.toLowerCase().endsWith('.pdf');
+                    if (!ok) {
+                      window.alert('Please choose a PDF file for the technical proposal.');
+                      e.target.value = '';
+                      return;
+                    }
+                    dispatch({
+                      type: 'SET_GROUP_RULES',
+                      rules: { ...state.groupRules, technicalProposalFileName: f.name },
+                    });
+                    e.target.value = '';
+                  }}
+                />
+                <button
+                  type="button"
+                  className="w-full border-2 border-dashed border-neutral-200 rounded-[1.5rem] p-10 flex flex-col items-center justify-center gap-4 hover:bg-neutral-50 hover:border-emerald-500/30 transition-all cursor-pointer group shadow-sm bg-neutral-50/10 text-left"
+                  onClick={() => technicalProposalInputRef.current?.click()}
+                >
+                  <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-600 transition-all group-hover:scale-110 shadow-sm ring-4 ring-white">
+                    <Plus className="w-7 h-7" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-bold text-neutral-900 tracking-tight">Upload technical proposal PDF</p>
+                    <p className="text-xs text-neutral-400 font-medium">PDF only · filename stored in demo mode</p>
+                    {state.groupRules.technicalProposalFileName ? (
+                      <p className="text-xs font-semibold text-emerald-700">Selected: {state.groupRules.technicalProposalFileName}</p>
                     ) : null}
                   </div>
                 </button>

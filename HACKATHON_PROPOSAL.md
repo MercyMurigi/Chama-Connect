@@ -41,6 +41,9 @@ Chama groups are community-critical financial structures, but operations are oft
 
 Without a reliable digital workflow, trust, accountability, and scaling become difficult.
 
+**Product and platform gaps (aligned to hackathon + PRD-style specs)**  
+Where the live or baseline product surface shows **empty metrics**, lacks **structured ICDMS cases**, or cannot yet prove **M-Pesa reconciliation**, treasurers cannot run the group on software alone. **AI** that is not grounded in **group rules** adds risk rather than clarity. Longer-horizon items (on-chain pooled treasury, Morpho-class yield, full Prisma persistence) require a phased build; this submission focuses on **admin UX**, **case discipline**, **penalty rules**, **simulated payments**, **audit trail**, and **LLM-backed summaries and case suggestions**—see **`docs/TECHNICAL_PROPOSAL.md`** for the full technical narrative and PRD mapping.
+
 ## 2) Proposed Solution
 
 This project improves ChamaConnect through a unified admin workspace that organizes group operations into clear, role-ready modules:
@@ -52,7 +55,17 @@ This project improves ChamaConnect through a unified admin workspace that organi
 - goals and share capital management views
 - settings/governance forms for operational consistency
 
-The current implementation establishes the UI/UX architecture and module boundaries, with ongoing work focused on production-grade logic and data integration.
+**Implemented or materially advanced in this repository**
+
+- **ICDMS-style Cases** — case list/detail flows, status and timeline actions, evidence hooks, **AI suggestion** via server `POST /api/llm/case-suggest` grounded in group rule snippets (`src/views/CasesView.tsx`, `src/domain/chamaReducer.ts`).
+- **Smart dashboard + demo** — seeded demo chama data and dashboard **monthly AI summary** via `POST /api/llm/monthly-summary` (`src/seed/lesomDynamics.ts`, `src/views/DashboardView.tsx`).
+- **Penalty / fines engine** — configurable fine rules and evaluation in domain logic (`src/domain/penalties.ts`, reducer).
+- **M-Pesa surface + simulation** — member/treasurer flows and domain matching helpers (`src/domain/mpesa.ts`, M-Pesa view); production Daraja integration is roadmap.
+- **Chama AI Advisor** — CopilotKit sidebar with grounded context and optional frontend tools (contribution, penalties, M-Pesa simulation) (`src/components/ChamaCopilot.tsx`).
+- **Audit trail** — structured `auditLog` and Settings **Audit** tab (`chamaReducer.ts` `pushAudit`).
+- **Submission artifacts in Settings** — **constitution** and **technical proposal** PDF file pickers (filename stored in demo state) for hackathon documentation workflows (`src/types.ts`, `src/App.tsx`).
+
+The current implementation establishes the UI/UX architecture and module boundaries, with ongoing work focused on **persistence**, **live payment APIs**, and **role-aware** production hardening. **Exportable technical proposal:** fill placeholders in **`docs/TECHNICAL_PROPOSAL.md`** and save as PDF for upload portals.
 
 ## 3) Hackathon Alignment
 
@@ -75,18 +88,22 @@ Completed:
 - Foundational page layouts for major ChamaConnect operations (including **Cases** and **M-Pesa** surfaces where applicable)
 - Domain-driven state and demo seed path (`src/domain/`, `src/seed/lesomDynamics.ts`)
 - Structured empty states and reusable UI patterns
+- **Audit trail** for many sensitive reducer actions (Settings → Audit)
+- **Express LLM routes** for dashboard monthly summary and case AI suggestions (`server/src/llmRoutes.ts`)
+- **Settings** governance text, constitution / technical proposal PDF **filename** registration (demo)
+- **Chama AI Advisor** (CopilotKit + optional tools) when API keys and `dev:server` are configured
 
 In progress:
 
-- API/data integration for transaction modules
+- API/data integration for transaction modules (beyond demo + LLM)
 - CRUD completion across members and finance workflows
 - Validation and role-aware permissions
 
 Planned:
 
-- audit trail metadata for sensitive actions
-- testing for critical financial paths
+- broader automated test coverage for critical financial paths
 - submission-ready demo evidence and impact metrics
+- M-Pesa Daraja + webhooks + reconciliation persistence (per PRD-style payment module)
 
 ## 5) Expected Impact
 
@@ -112,10 +129,13 @@ Planned:
 - Frontend: React + TypeScript + Vite + Tailwind CSS
 - Architecture: modular page-level flows with reusable UI components
 - Data Model: typed domain entities (`chama`, `member`, `contribution`, `loan`, etc.)
+- API: Express server for CopilotKit (`/api/copilotkit`) and LLM JSON helpers (`/api/llm/*`); optional Vercel/serverless wiring per repo config
 - Delivery Strategy:
   - phase 1: UX foundation and information architecture
-  - phase 2: business logic and API integration
+  - phase 2: business logic and API integration (including persistence where adopted)
   - phase 3: validation, testing, and submission hardening
+
+**External PRD note:** Some organizer specs describe **Next.js 14 + Prisma + on-chain** modules. This fork stays on **Vite + Express** while implementing overlapping **product** goals; see **`docs/TECHNICAL_PROPOSAL.md` §4** for a module-by-module honesty table.
 
 ## 7) Milestones
 
@@ -154,7 +174,7 @@ Planned:
 5. Open **M-Pesa** (and related finance views) to explain payment and reconciliation direction.
 6. Open Contributions / Finances to explain the transaction pipeline.
 7. Open Fines and Appeals to explain dispute and penalty workflow direction.
-8. Open Settings and show governance configuration readiness.
+8. Open Settings and show governance configuration readiness (rule snippets, constitution / technical proposal PDF picks, Audit tab).
 9. Close with binding terms acknowledgment (PDF **§2**) and planned production integration impact.
 
 ## 11) What Remains Before Final Submission

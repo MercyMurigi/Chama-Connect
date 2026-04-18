@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 import {
   CopilotKit,
   CopilotSidebar,
+  CopilotSidebarView,
+  type JsonSerializable,
   useAgentContext,
   useConfigureSuggestions,
   useFrontendTool,
@@ -9,26 +11,25 @@ import {
 import '@copilotkit/react-core/v2/styles.css';
 import { z } from 'zod';
 import { useChama } from '@/src/domain/chamaContext';
+import { CHAMA_COPILOT_SUGGESTIONS } from '@/src/copilot/chamaChatSuggestions';
+import { AiAssistantCard } from '@/components/ui/ai-assistant-card';
 
-const CHAT_SUGGESTIONS = [
-  {
-    title: 'Finance snapshot',
-    message:
-      'Summarize total paid contributions, income, and expenses for this chama in plain language (English or Kiswahili).',
-  },
-  {
-    title: 'Contribution help',
-    message: 'Which members still have pending monthly contributions, and what amounts are due?',
-  },
-  {
-    title: 'Run penalties',
-    message: 'Run the late-payment penalty evaluation and tell me what changed in the fines list.',
-  },
-  {
-    title: 'M-Pesa simulator',
-    message: 'How do I simulate an M-Pesa payment for amount 5000 and phone 254712000004?',
-  },
-] as const;
+function ChamaAiAssistantWelcomeScreen(
+  props: React.ComponentProps<typeof CopilotSidebarView.WelcomeScreen>,
+) {
+  return (
+    <CopilotSidebarView.WelcomeScreen {...props}>
+      {({ suggestionView }) => (
+        <div className="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
+          <AiAssistantCard />
+          <div className="sr-only" aria-hidden>
+            {suggestionView}
+          </div>
+        </div>
+      )}
+    </CopilotSidebarView.WelcomeScreen>
+  );
+}
 
 function ChamaCopilotContext() {
   const { state, dispatch } = useChama();
@@ -53,12 +54,12 @@ function ChamaCopilotContext() {
 
   useAgentContext({
     description: 'Live chama data for grounded answers (English/Kiswahili)',
-    value: snapshot,
+    value: structuredClone(snapshot) as unknown as JsonSerializable,
   });
 
   useConfigureSuggestions(
     {
-      suggestions: [...CHAT_SUGGESTIONS],
+      suggestions: [...CHAMA_COPILOT_SUGGESTIONS],
       available: 'before-first-message',
       consumerAgentId: 'default',
     },
@@ -118,13 +119,12 @@ function ChamaCopilotContext() {
       className="copilot-chama-connect"
       agentId="default"
       defaultOpen={false}
-      clickOutsideToClose
       width={420}
+      welcomeScreen={ChamaAiAssistantWelcomeScreen}
       labels={{
         modalHeaderTitle: 'Chama AI Advisor',
         chatInputPlaceholder: 'Ask about contributions, fines, loans, or M-Pesa…',
       }}
-      instructions="Use only numbers from readable context. Support Kiswahili. For legal matters, remind users to verify with the group constitution."
     />
   );
 }

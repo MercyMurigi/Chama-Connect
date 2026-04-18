@@ -83,10 +83,13 @@ To align this codebase with the hackathon objective, prioritize:
 - Tightening validation, error handling, and role-based behavior
 - Adding test coverage for critical financial and record-management flows
 
+If you use an external **PRD** (e.g. Next.js + Prisma + on-chain modules), keep **`docs/TECHNICAL_PROPOSAL.md`** updated so judges see a clear map between that spec and this repo’s shipped scope.
+
 ## Quick Reference
 
 - Main project documentation: `README.md`
 - Proposal / judge narrative: `HACKATHON_PROPOSAL.md`
+- Technical proposal (export to PDF): `docs/TECHNICAL_PROPOSAL.md`
 - Binding submission contract + PDF index: `docs/README.md`
 - Convenience summary of PDF topics (subordinate to PDF): `REPOSITORY_TERMS.md`
 - Contributor acceptance: `CONTRIBUTOR_SIGN_OFF.md`

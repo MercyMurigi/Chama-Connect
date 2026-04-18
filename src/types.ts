@@ -207,6 +207,8 @@ export interface GroupRules {
   chamaKind: ChamaKind;
   /** Last constitution file picked in-browser (name only; demo) */
   constitutionFileName?: string;
+  /** Hackathon / technical proposal PDF — filename only in demo (no binary persistence) */
+  technicalProposalFileName?: string;
 }
 
 export interface GroupSchedule {

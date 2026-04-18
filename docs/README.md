@@ -21,3 +21,9 @@ Announcement artwork (same as in that brief):
 Judge-facing proposal template:
 
 - [`../HACKATHON_PROPOSAL.md`](../HACKATHON_PROPOSAL.md)
+
+Technical proposal (source for PDF export — fill placeholders, then print/save as PDF for upload portals):
+
+- [`TECHNICAL_PROPOSAL.md`](./TECHNICAL_PROPOSAL.md)
+
+If you work from an external **ChamaConnect PRD & Agent Execution Spec** (Next.js / Prisma / on-chain modules), use **§4** of `TECHNICAL_PROPOSAL.md` to map that document to **this** repository’s actual stack and scope.

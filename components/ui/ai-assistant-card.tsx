@@ -307,6 +307,49 @@ export function AiAssistantCard() {
         </div>
 
         <div className="relative mt-auto flex flex-col rounded-md ring-1 ring-border">
+          <div
+            className="border-b border-border/80 bg-muted/30 px-2 py-2"
+            role="region"
+            aria-label="Quick suggested prompts"
+          >
+            <p className="mb-1.5 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Suggested
+            </p>
+            <div className="relative">
+              <div
+                className="-mx-0.5 flex gap-2 overflow-x-auto overscroll-x-contain px-0.5 pb-0.5 pt-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                tabIndex={0}
+              >
+                {prompts.map((s, i) => {
+                  const Icon = BADGE_ICONS[i] ?? SparklesIcon
+                  const color =
+                    i === 0
+                      ? "text-blue-500"
+                      : i === 1
+                        ? "text-orange-500"
+                        : i === 2
+                          ? "text-green-500"
+                          : i === 3
+                            ? "text-pink-500"
+                            : i === 4
+                              ? "text-yellow-500"
+                              : "text-purple-500"
+                  return (
+                    <button
+                      key={`carousel-${s.title}`}
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void sendText(s.message)}
+                      className="flex min-w-[max-content] max-w-[220px] shrink-0 snap-start items-center gap-2 rounded-lg border border-border/80 bg-background/90 px-2.5 py-1.5 text-left text-xs shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60 disabled:pointer-events-none disabled:opacity-50"
+                    >
+                      <Icon aria-hidden className={`size-3.5 shrink-0 ${color}`} />
+                      <span className="line-clamp-2 font-medium leading-snug">{s.title}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
           <div className="relative">
             <Textarea
               ref={textareaRef}

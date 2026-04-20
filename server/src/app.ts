@@ -59,6 +59,8 @@ try {
       runtime,
       basePath: '/api/copilotkit',
       cors: true,
+      // CopilotKit v2 browser client posts to this single URL; multi-route expects /agent/.../run paths and returns 404.
+      mode: 'single-route',
     }),
   );
   copilotMounted = true;
@@ -70,7 +72,7 @@ try {
 }
 
 app.get('/api/health', (_req, res) => {
-  const port = Number(process.env.PORT || 3001);
+  const port = Number(process.env.API_PORT || process.env.PORT || 3001);
   res.json({ ok: true, copilot: copilotMounted, port });
 });
 

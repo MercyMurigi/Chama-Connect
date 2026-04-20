@@ -5,6 +5,12 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  /**
+   * Express API port for the dev/preview /api proxy.
+   * Prefer API_PORT. If only PORT is set to 3000 (common confusion with Vite's port), default to 3001
+   * so the proxy does not target Vite itself (which yields 404 for /api/copilotkit).
+   */
+  const apiProxyPort = env.API_PORT || (env.PORT && env.PORT !== '3000' ? env.PORT : '') || '3001';
   return {
     plugins: [react(), tailwindcss()],
     define: {
@@ -21,7 +27,7 @@ export default defineConfig(({mode}) => {
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
         '/api': {
-          target: `http://127.0.0.1:${env.PORT || '3001'}`,
+          target: `http://127.0.0.1:${apiProxyPort}`,
           changeOrigin: true,
         },
       },
@@ -29,7 +35,7 @@ export default defineConfig(({mode}) => {
     preview: {
       proxy: {
         '/api': {
-          target: `http://127.0.0.1:${env.PORT || '3001'}`,
+          target: `http://127.0.0.1:${apiProxyPort}`,
           changeOrigin: true,
         },
       },
